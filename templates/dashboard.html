@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h1 class="display-5 fw-bold gradient-text mb-2">Мои проекты</h1>
+                    <p class="lead text-dark">Управляйте своими таймлайнами и создавайте новые</p>
+                </div>
+                <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg pulse">
+                    <i class="fas fa-plus me-2"></i>Новый таймлайн
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-4 mb-5 fade-in">
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <div class="feature-icon mx-auto mb-3">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3 class="fw-bold text-dark">{{ timelines.count }}</h3>
+                <p class="text-muted mb-0">Всего таймлайнов</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <div class="feature-icon mx-auto mb-3">
+                    <i class="fas fa-list"></i>
+                </div>
+                <h3 class="fw-bold text-dark">{{ total_events }}</h3>
+                <p class="text-muted mb-0">Всего событий</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="glass-card p-4 text-center">
+                <div class="feature-icon mx-auto mb-3">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="fw-bold text-dark">{{ public_timelines_count }}</h3>
+                <p class="text-muted mb-0">Публичных таймлайнов</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timelines Grid -->
+    <div class="row g-4">
+        {% for timeline in timelines %}
+        <div class="col-md-6 col-lg-4 fade-in">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold text-dark text-truncate me-2">{{ timeline.title }}</h5>
+                    <span class="badge {% if timeline.is_public %}bg-success{% else %}bg-secondary{% endif %} rounded-pill">
+                        {% if timeline.is_public %}Публичный{% else %}Приватный{% endif %}
+                    </span>
+                </div>
+
+                <p class="text-muted mb-3">{{ timeline.description|truncatewords:12 }}</p>
+
+                <!-- Timeline Preview -->
+                <div class="timeline-preview position-relative mb-3">
+                    {% for event in timeline.events.all|slice:":2" %}
+                    <div class="mb-2 position-relative">
+                        <div class="timeline-dot"></div>
+                        <strong class="text-primary">{{ event.year }}</strong>
+                        <span class="text-dark ms-2">{{ event.title|truncatewords:2 }}</span>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-2">
+                        <i class="fas fa-plus text-muted"></i>
+                        <small class="text-muted d-block">Добавьте первое событие</small>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>{{ timeline.created_at|date:"d.m.Y" }}
+                    </small>
+                    <small class="text-muted">
+                        <i class="fas fa-list me-1"></i>{{ timeline.events.count }} событий
+                    </small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="btn-group w-100" role="group">
+                    <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-outline-primary btn-sm flex-fill">
+                        <i class="fas fa-edit me-1"></i>Редактировать
+                    </a>
+                    <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-outline-secondary btn-sm flex-fill">
+                        <i class="fas fa-eye me-1"></i>Просмотреть
+                    </a>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ timeline.pk }}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Modal -->
+        <div class="modal fade" id="deleteModal{{ timeline.pk }}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content glass-card border-0">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title gradient-text fw-bold">Удаление таймлайна</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-exclamation-triangle display-4 text-warning"></i>
+                        </div>
+                        <p class="text-center">Вы уверены, что хотите удалить таймлайн <strong>"{{ timeline.title }}"</strong>?</p>
+                        <div class="alert alert-warning glass-card border-warning text-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Это действие нельзя отменить
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <form method="post" action="{% url 'timeline_delete' timeline.pk %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i>Удалить
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 fade-in">
+            <div class="glass-card text-center py-5">
+                <i class="fas fa-inbox display-1 gradient-text mb-3"></i>
+                <h3 class="fw-bold text-dark mb-3">У вас пока нет таймлайнов</h3>
+                <p class="text-muted mb-4">Создайте свой первый таймлайн и начните изучать историю математики!</p>
+                <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Создать первый таймлайн
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

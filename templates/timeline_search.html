@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="glass-card p-5 mb-4">
+                <h1 class="fw-bold gradient-text text-center mb-4">Поиск таймлайнов</h1>
+                
+                <form method="get" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" name="q" class="form-control form-control-lg" 
+                               placeholder="Поиск по названию, описанию или событиям..." 
+                               value="{{ query }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="era" class="form-select form-select-lg">
+                            <option value="">Все эпохи</option>
+                            <option value="ancient" {% if era_filter == 'ancient' %}selected{% endif %}>Древняя</option>
+                            <option value="medieval" {% if era_filter == 'medieval' %}selected{% endif %}>Средневековая</option>
+                            <option value="renaissance" {% if era_filter == 'renaissance' %}selected{% endif %}>Возрождение</option>
+                            <option value="modern" {% if era_filter == 'modern' %}selected{% endif %}>Современная</option>
+                            <option value="contemporary" {% if era_filter == 'contemporary' %}selected{% endif %}>Современность</option>
+                        </select>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if query or era_filter %}
+    <div class="row fade-in">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                Результаты поиска
+                <small class="text-muted">({{ timelines.count }})</small>
+            </h3>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4">
+        {% for timeline in timelines %}
+        <div class="col-md-6 col-lg-4 fade-in">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold text-dark text-truncate me-2">{{ timeline.title }}</h5>
+                    <span class="badge bg-primary rounded-pill">{{ timeline.events.count }}</span>
+                </div>
+                
+                <p class="text-muted mb-3">{{ timeline.description|truncatewords:15 }}</p>
+                
+                <div class="timeline-preview position-relative mb-3">
+                    {% for event in timeline.events.all|slice:":2" %}
+                    <div class="mb-2 position-relative">
+                        <div class="timeline-dot"></div>
+                        <strong class="text-primary">{{ event.year }}</strong>
+                        <span class="text-dark ms-2">{{ event.title|truncatewords:2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-user me-1"></i>{{ timeline.created_by.username }}
+                    </small>
+                    <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-sm btn-primary">
+                        Открыть
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        {% if query or era_filter %}
+        <div class="col-12 fade-in">
+            <div class="glass-card text-center py-5">
+                <i class="fas fa-search display-1 gradient-text mb-3"></i>
+                <h4 class="fw-bold text-dark mb-3">Ничего не найдено</h4>
+                <p class="text-muted mb-4">Попробуйте изменить параметры поиска</p>
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

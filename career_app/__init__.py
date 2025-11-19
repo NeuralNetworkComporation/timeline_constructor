@@ -1,1 +1,0 @@
-default_app_config = 'career_app.apps.CareerAppConfig'

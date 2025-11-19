@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 fade-in">
+            <div class="glass-card p-5">
+                <div class="text-center mb-5">
+                    <i class="fas fa-user-plus display-1 gradient-text mb-3"></i>
+                    <h1 class="fw-bold gradient-text">Создать аккаунт</h1>
+                    <p class="text-muted">Присоединяйтесь к сообществу MathTimeline</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="username" class="form-label fw-semibold">Имя пользователя *</label>
+                            <input type="text" name="username" class="form-control" id="username" required
+                                   placeholder="Придумайте уникальное имя">
+                            <div class="form-text">Только буквы, цифры и @/./+/-/_</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label for="password1" class="form-label fw-semibold">Пароль *</label>
+                            <input type="password" name="password1" class="form-control" id="password1" required
+                                   placeholder="Не менее 8 символов">
+                        </div>
+
+                        <div class="col-12">
+                            <label for="password2" class="form-label fw-semibold">Подтверждение пароля *</label>
+                            <input type="password" name="password2" class="form-control" id="password2" required
+                                   placeholder="Повторите пароль">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="glass-card p-3 bg-light">
+                                <h6 class="fw-semibold mb-2">Требования к паролю:</h6>
+                                <ul class="list-unstyled small text-muted mb-0">
+                                    <li><i class="fas fa-check text-success me-1"></i> Не менее 8 символов</li>
+                                    <li><i class="fas fa-check text-success me-1"></i> Не только цифры</li>
+                                    <li><i class="fas fa-check text-success me-1"></i> Не слишком простой</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>Создать аккаунт
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted mb-0">
+                        Уже есть аккаунт?
+                        <a href="{% url 'login' %}" class="text-primary fw-semibold text-decoration-none">
+                            Войдите здесь
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

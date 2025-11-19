@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h1 class="display-5 fw-bold gradient-text mb-2">Все публичные таймлайны</h1>
+                    <p class="lead text-dark">Исследуйте работы нашего сообщества</p>
+                </div>
+                {% if user.is_authenticated %}
+                <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Создать свой
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4 fade-in">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" placeholder="Поиск по названию или описанию..." id="searchInput">
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="eraFilter">
+                            <option value="">Все эпохи</option>
+                            <option value="ancient">Древняя математика</option>
+                            <option value="medieval">Средневековая математика</option>
+                            <option value="renaissance">Эпоха Возрождения</option>
+                            <option value="modern">Современная математика</option>
+                            <option value="contemporary">Современность</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timelines Grid -->
+    <div class="row g-4" id="timelinesContainer">
+        {% for timeline in timelines %}
+        <div class="col-md-6 col-lg-4 fade-in timeline-card"
+             data-title="{{ timeline.title|lower }}"
+             data-description="{{ timeline.description|lower }}">
+            <div class="glass-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="fw-bold text-dark text-truncate me-2">{{ timeline.title }}</h5>
+                    <span class="badge bg-primary rounded-pill">{{ timeline.events.count }}</span>
+                </div>
+
+                <p class="text-muted mb-3">{{ timeline.description|truncatewords:15 }}</p>
+
+                <!-- Events Preview -->
+                <div class="timeline-preview position-relative mb-3">
+                    {% for event in timeline.events.all|slice:":3" %}
+                    <div class="mb-2 position-relative">
+                        <div class="timeline-dot"></div>
+                        <strong class="text-primary">{{ event.year }}</strong>
+                        <span class="text-dark ms-2">{{ event.title|truncatewords:2 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        <i class="fas fa-user me-1"></i>{{ timeline.created_by.username }}
+                    </small>
+                    <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-sm btn-primary">
+                        Открыть <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 fade-in">
+            <div class="glass-card text-center py-5">
+                <i class="fas fa-inbox display-1 gradient-text mb-3"></i>
+                <h4 class="fw-bold text-dark mb-3">Пока нет публичных таймлайнов</h4>
+                <p class="text-muted mb-4">Будьте первым, кто создаст вдохновляющий таймлайн!</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Создать первый таймлайн
+                    </a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    // Поиск и фильтрация
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchInput');
+        const eraFilter = document.getElementById('eraFilter');
+        const timelineCards = document.querySelectorAll('.timeline-card');
+
+        function filterTimelines() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const eraValue = eraFilter.value;
+
+            timelineCards.forEach(card => {
+                const title = card.getAttribute('data-title');
+                const description = card.getAttribute('data-description');
+                const matchesSearch = title.includes(searchTerm) || description.includes(searchTerm);
+
+                if (matchesSearch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('input', filterTimelines);
+        eraFilter.addEventListener('change', filterTimelines);
+    });
+</script>
+{% endblock %}

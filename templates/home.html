@@ -1,0 +1,243 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-bg"></div>
+    <div class="container position-relative">
+        <div class="row align-items-center">
+            <div class="col-lg-6 fade-in">
+                <h1 class="display-4 fw-bold mb-4 gradient-text">История математики в интерактивных таймлайнах</h1>
+                <p class="lead mb-4 fs-5 text-dark">Создавайте, изучайте и делитесь увлекательными хронологиями математических открытий. Просто, красиво, бесплатно.</p>
+
+                <div class="d-flex flex-wrap gap-3 mb-5">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="btn btn-primary btn-lg pulse">
+                            <i class="fas fa-rocket me-2"></i>Мои проекты
+                        </a>
+                        <a href="{% url 'timeline_create' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Создать таймлайн
+                        </a>
+                    {% else %}
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg pulse">
+                            <i class="fas fa-user-plus me-2"></i>Начать бесплатно
+                        </a>
+                        <a href="{% url 'login' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти в аккаунт
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="d-flex flex-wrap gap-4 text-dark">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Никакого обучения</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Бесплатно навсегда</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        <span>Для всех возрастов</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 fade-in">
+                <div class="text-center floating">
+                    <div class="glass-card p-5 mx-auto">
+                        <div class="stats-card mb-4">
+                            <h3 class="fw-bold">{{ public_timelines.count }}+</h3>
+                            <p class="mb-0">таймлайнов создано</p>
+                        </div>
+                        <i class="fas fa-project-diagram display-1 gradient-text mb-3"></i>
+                        <h4 class="fw-bold text-dark">Визуализируйте историю</h4>
+                        <p class="text-muted">От древних цивилизаций до современных открытий</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5 fade-in">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold gradient-text mb-3">Почему MathTimeline?</h2>
+                <p class="lead text-dark">Все необходимое для создания потрясающих таймлайнов</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 fade-in">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-magic"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Просто и понятно</h4>
+                    <p class="text-muted">Интуитивный интерфейс, с которым справится каждый. Никаких сложных настроек.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 fade-in">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Красивый дизайн</h4>
+                    <p class="text-muted">Современный дизайн с плавными анимациями. Ваши таймлайны будут выглядеть профессионально.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 fade-in">
+                <div class="glass-card p-4 text-center h-100">
+                    <div class="feature-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Делитесь знаниями</h4>
+                    <p class="text-muted">Публикуйте свои работы и изучайте таймлайны других. Вдохновляйтесь и вдохновляйте.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5 fade-in">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold gradient-text mb-3">Как это работает?</h2>
+                <p class="lead text-dark">Всего 3 простых шага до вашего первого таймлайна</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4 fade-in">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <span class="fw-bold">1</span>
+                    </div>
+                    <h4 class="fw-bold mb-3">Создайте проект</h4>
+                    <p class="text-muted">Зарегистрируйтесь и создайте новый таймлайн. Дайте ему название и описание.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 fade-in">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <span class="fw-bold">2</span>
+                    </div>
+                    <h4 class="fw-bold mb-3">Добавьте события</h4>
+                    <p class="text-muted">Наполните таймлайн событиями: годы, описания, изображения. Расставляйте в хронологическом порядке.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4 fade-in">
+                <div class="text-center">
+                    <div class="feature-icon mb-3">
+                        <span class="fw-bold">3</span>
+                    </div>
+                    <h4 class="fw-bold mb-3">Поделитесь</h4>
+                    <p class="text-muted">Опубликуйте таймлайн и поделитесь ссылкой с друзьями, учениками или коллегами.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Featured Timelines -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5 fade-in">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold gradient-text mb-3">Примеры таймлайнов</h2>
+                <p class="lead text-dark">Вдохновляйтесь работами нашего сообщества</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            {% for timeline in public_timelines %}
+            <div class="col-md-6 col-lg-4 fade-in">
+                <div class="glass-card p-4 h-100">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="fw-bold text-dark">{{ timeline.title }}</h5>
+                        <span class="badge bg-primary rounded-pill">{{ timeline.events.count }} событий</span>
+                    </div>
+                    <p class="text-muted mb-3">{{ timeline.description|truncatewords:15 }}</p>
+                    <div class="timeline-preview position-relative">
+                        {% for event in timeline.events.all|slice:":3" %}
+                        <div class="mb-2 position-relative">
+                            <div class="timeline-dot"></div>
+                            <strong class="text-primary">{{ event.year }}</strong>
+                            <span class="text-dark ms-2">{{ event.title|truncatewords:3 }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-3">
+                        <small class="text-muted">Автор: {{ timeline.created_by.username }}</small>
+                        <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-sm btn-primary">
+                            Смотреть <i class="fas fa-arrow-right ms-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 fade-in">
+                <div class="glass-card text-center py-5">
+                    <i class="fas fa-inbox display-1 gradient-text mb-3"></i>
+                    <h4 class="fw-bold text-dark mb-3">Пока нет публичных таймлайнов</h4>
+                    <p class="text-muted mb-4">Станьте первым, кто создаст вдохновляющий таймлайн!</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Создать первый таймлайн
+                        </a>
+                    {% else %}
+                        <a href="{% url 'signup' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Начать создавать
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if public_timelines %}
+        <div class="row mt-5 fade-in">
+            <div class="col-12 text-center">
+                <a href="{% url 'timeline_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-list me-2"></i>Смотреть все таймлайны
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="glass-card p-5 text-center fade-in">
+            <h2 class="display-6 fw-bold gradient-text mb-3">Готовы начать?</h2>
+            <p class="lead text-muted mb-4">Присоединяйтесь к сообществу любителей математики и истории прямо сейчас</p>
+            {% if user.is_authenticated %}
+                <a href="{% url 'timeline_create' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-plus me-2"></i>Создать новый таймлайн
+                </a>
+                <a href="{% url 'timeline_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-eye me-2"></i>Исследовать другие
+                </a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn btn-primary btn-lg me-3">
+                    <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                </a>
+                <a href="{% url 'timeline_list' %}" class="btn btn-outline-primary btn-lg">
+                    <i class="fas fa-eye me-2"></i>Посмотреть примеры
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

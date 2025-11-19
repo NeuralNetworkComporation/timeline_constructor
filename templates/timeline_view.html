@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+<style>
+    .timeline-container {
+        position: relative;
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .timeline-container::before {
+        content: '';
+        position: absolute;
+        width: 4px;
+        background: linear-gradient(180deg, var(--primary), var(--primary-dark));
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        margin-left: -2px;
+        border-radius: 10px;
+    }
+
+    .timeline-item {
+        padding: 20px;
+        position: relative;
+        width: 50%;
+        box-sizing: border-box;
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.6s ease forwards;
+    }
+
+    .timeline-item:nth-child(even) {
+        left: 50%;
+        animation-delay: 0.2s;
+    }
+
+    .timeline-item:nth-child(odd) {
+        animation-delay: 0.4s;
+    }
+
+    .timeline-item::after {
+        content: '';
+        position: absolute;
+        width: 16px;
+        height: 16px;
+        background: var(--primary);
+        border: 4px solid white;
+        top: 30px;
+        border-radius: 50%;
+        z-index: 1;
+        box-shadow: 0 0 0 4px var(--primary-light);
+    }
+
+    .timeline-item:nth-child(odd)::after {
+        right: -8px;
+    }
+
+    .timeline-item:nth-child(even)::after {
+        left: -8px;
+    }
+
+    .timeline-content {
+        padding: 25px;
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        border: var(--border);
+        transition: all 0.3s ease;
+    }
+
+    .timeline-content:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .timeline-year {
+        font-weight: 800;
+        color: var(--primary);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+        display: inline-block;
+        padding: 5px 15px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 20px;
+    }
+
+    .era-badge {
+        position: absolute;
+        top: 20px;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: var(--primary);
+        color: white;
+    }
+
+    .timeline-item:nth-child(odd) .era-badge {
+        right: -80px;
+    }
+
+    .timeline-item:nth-child(even) .era-badge {
+        left: -80px;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .timeline-container::before {
+            left: 31px;
+        }
+
+        .timeline-item {
+            width: 100%;
+            padding-left: 70px;
+            padding-right: 25px;
+        }
+
+        .timeline-item:nth-child(even) {
+            left: 0;
+        }
+
+        .timeline-item::after {
+            left: 23px !important;
+        }
+
+        .era-badge {
+            left: 70px !important;
+            right: auto !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row fade-in mb-5">
+        <div class="col-12">
+            <div class="glass-card p-5 text-center">
+                <h1 class="display-5 fw-bold gradient-text mb-3">{{ timeline.title }}</h1>
+                <p class="lead text-dark mb-4">{{ timeline.description }}</p>
+
+                <div class="row justify-content-center">
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="fas fa-user me-2"></i>
+                            <span>Автор: {{ timeline.created_by.username }}</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="fas fa-list me-2"></i>
+                            <span>Событий: {{ events.count }}</span>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="fas fa-calendar me-2"></i>
+                            <span>Обновлен: {{ timeline.updated_at|date:"d.m.Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                {% if user == timeline.created_by %}
+                <div class="mt-4">
+                    <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-primary">
+                        <i class="fas fa-edit me-2"></i>Редактировать таймлайн
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-container">
+        {% for event in events %}
+        <div class="timeline-item {% if forloop.counter|divisibleby:2 %}even{% else %}odd{% endif %}">
+            <span class="era-badge">{{ event.get_era_display }}</span>
+            <div class="timeline-content">
+                <div class="timeline-year">{{ event.year }} год</div>
+                <h4 class="fw-bold text-dark mb-3">{{ event.title }}</h4>
+                <p class="text-muted mb-3">{{ event.description }}</p>
+                {% if event.image %}
+                <div class="text-center mt-3">
+                    <img src="{{ event.image.url }}" alt="{{ event.title }}"
+                         class="img-fluid rounded" style="max-height: 300px;">
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Empty State -->
+    {% if not events %}
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="glass-card text-center py-5">
+                <i class="fas fa-inbox display-1 gradient-text mb-3"></i>
+                <h3 class="fw-bold text-dark mb-3">Пока нет событий</h3>
+                <p class="text-muted mb-4">В этом таймлайне еще нет добавленных событий.</p>
+                {% if user == timeline.created_by %}
+                <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Добавить первое событие
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    // Анимация появления элементов таймлайна
+    document.addEventListener('DOMContentLoaded', function() {
+        const timelineItems = document.querySelectorAll('.timeline-item');
+        timelineItems.forEach((item, index) => {
+            setTimeout(() => {
+                item.style.animationDelay = (index * 0.2) + 's';
+            }, 100);
+        });
+    });
+</script>
+{% endblock %}

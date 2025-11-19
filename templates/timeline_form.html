@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 fade-in">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold gradient-text">Создать новый таймлайн</h2>
+                    <p class="text-muted">Заполните основную информацию о вашем таймлайне</p>
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Название таймлайна *</label>
+                        <input type="text" name="title" class="form-control" required
+                               value="{{ form.title.value|default:'' }}"
+                               placeholder="Например: История алгебры">
+                        {% if form.title.errors %}
+                            <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Описание</label>
+                        <textarea name="description" class="form-control" rows="3"
+                                  placeholder="Опишите, о чем этот таймлайн...">{{ form.description.value|default:'' }}</textarea>
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Цветовая схема</label>
+                        <select name="color_scheme" class="form-select">
+                            <option value="green" selected>Зеленая</option>
+                            <option value="blue">Синяя</option>
+                            <option value="purple">Фиолетовая</option>
+                            <option value="orange">Оранжевая</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_public" id="is_public"
+                                   {% if form.is_public.value %}checked{% endif %}>
+                            <label class="form-check-label fw-semibold" for="is_public">
+                                Сделать таймлайн публичным
+                            </label>
+                        </div>
+                        <div class="form-text">
+                            Публичные таймлайны видны всем пользователям
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-3">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary flex-fill">
+                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                        </a>
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            <i class="fas fa-plus me-2"></i>Создать таймлайн
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
