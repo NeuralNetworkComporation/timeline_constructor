@@ -1,0 +1,1639 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Политика конфиденциальности - TechTalentHub{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="content-hero" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 120px 0 80px;">
+    <div class="container">
+        <div class="row justify-content-center text-center">
+            <div class="col-lg-8">
+                <div class="hero-content">
+                    <div class="badge-platform mb-4">
+                        <span>Защита данных</span>
+                        <div class="badge-sparkle">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                    </div>
+                    <h1 class="hero-title">
+                        Политика конфиденциальности
+                    </h1>
+                    <p class="hero-subtitle">
+                        Как мы защищаем и обрабатываем ваши персональные данные
+                    </p>
+                    <div class="last-update">
+                        <i class="fas fa-clock me-2"></i>
+                        Последнее обновление: 15 декабря 2024 года
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Background Elements -->
+    <div class="content-hero-bg">
+        <div class="bg-element element-1"></div>
+        <div class="bg-element element-2"></div>
+        <div class="bg-element element-3"></div>
+    </div>
+</section>
+
+<!-- Content Section -->
+<section class="content-section py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="content-card">
+                    <!-- Table of Contents -->
+                    <div class="toc-card mb-5">
+                        <h5><i class="fas fa-list me-2"></i>Содержание</h5>
+                        <nav class="toc-nav">
+                            <a href="#introduction" class="toc-link">1. Введение</a>
+                            <a href="#data-collection" class="toc-link">2. Сбор данных</a>
+                            <a href="#data-usage" class="toc-link">3. Использование данных</a>
+                            <a href="#data-protection" class="toc-link">4. Защита данных</a>
+                            <a href="#data-sharing" class="toc-link">5. Передача данных</a>
+                            <a href="#user-rights" class="toc-link">6. Права пользователей</a>
+                            <a href="#cookies" class="toc-link">7. Файлы cookie</a>
+                            <a href="#changes" class="toc-link">8. Изменения политики</a>
+                        </nav>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="content-body">
+                        <!-- Section 1 -->
+                        <div id="introduction" class="content-section-item">
+                            <h2 class="section-number">1</h2>
+                            <div class="section-content">
+                                <h3>Введение</h3>
+                                <p>TechTalentHub серьезно относится к защите вашей конфиденциальности. Эта политика объясняет, как мы собираем, используем и защищаем ваши персональные данные.</p>
+
+                                <div class="principles-grid">
+                                    <div class="principle-item">
+                                        <div class="principle-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <h6>Прозрачность</h6>
+                                        <p>Четко объясняем, какие данные собираем и зачем</p>
+                                    </div>
+                                    <div class="principle-item">
+                                        <div class="principle-icon">
+                                            <i class="fas fa-shield-check"></i>
+                                        </div>
+                                        <h6>Безопасность</h6>
+                                        <p>Защищаем ваши данные современными технологиями</p>
+                                    </div>
+                                    <div class="principle-item">
+                                        <div class="principle-icon">
+                                            <i class="fas fa-user-cog"></i>
+                                        </div>
+                                        <h6>Контроль</h6>
+                                        <p>Предоставляем вам контроль над вашими данными</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 2 -->
+                        <div id="data-collection" class="content-section-item">
+                            <h2 class="section-number">2</h2>
+                            <div class="section-content">
+                                <h3>Сбор данных</h3>
+                                <p>Мы собираем только те данные, которые необходимы для предоставления наших услуг.</p>
+
+                                <div class="data-types">
+                                    <div class="data-type-category">
+                                        <div class="category-header">
+                                            <i class="fas fa-user-circle"></i>
+                                            <h5>Основная информация</h5>
+                                        </div>
+                                        <ul class="data-list">
+                                            <li><i class="fas fa-user"></i> Имя и контактные данные</li>
+                                            <li><i class="fas fa-envelope"></i> Email адрес</li>
+                                            <li><i class="fas fa-phone"></i> Номер телефона (опционально)</li>
+                                            <li><i class="fas fa-briefcase"></i> Профессиональная информация</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="data-type-category">
+                                        <div class="category-header">
+                                            <i class="fas fa-chart-line"></i>
+                                            <h5>Профессиональные данные</h5>
+                                        </div>
+                                        <ul class="data-list">
+                                            <li><i class="fas fa-graduation-cap"></i> Образование и квалификация</li>
+                                            <li><i class="fas fa-history"></i> Опыт работы</li>
+                                            <li><i class="fas fa-star"></i> Навыки и компетенции</li>
+                                            <li><i class="fas fa-file-pdf"></i> Резюме и портфолио</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="data-type-category">
+                                        <div class="category-header">
+                                            <i class="fas fa-laptop-code"></i>
+                                            <h5>Технические данные</h5>
+                                        </div>
+                                        <ul class="data-list">
+                                            <li><i class="fas fa-desktop"></i> IP-адрес и данные браузера</li>
+                                            <li><i class="fas fa-cookie"></i> Данные файлов cookie</li>
+                                            <li><i class="fas fa-chart-bar"></i> Статистика использования</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="consent-box">
+                                    <i class="fas fa-handshake"></i>
+                                    <div>
+                                        <strong>Согласие на обработку</strong>
+                                        <p>Используя платформу, вы даете согласие на обработку ваших персональных данных в соответствии с настоящей политикой.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div id="data-usage" class="content-section-item">
+                            <h2 class="section-number">3</h2>
+                            <div class="section-content">
+                                <h3>Использование данных</h3>
+                                <p>Ваши данные используются для следующих целей:</p>
+
+                                <div class="usage-purposes">
+                                    <div class="purpose-item">
+                                        <div class="purpose-header">
+                                            <div class="purpose-icon">
+                                                <i class="fas fa-briefcase"></i>
+                                            </div>
+                                            <h6>Трудоустройство</h6>
+                                        </div>
+                                        <p>Подбор вакансий и стажировок, соответствующих вашему профилю</p>
+                                    </div>
+
+                                    <div class="purpose-item">
+                                        <div class="purpose-header">
+                                            <div class="purpose-icon">
+                                                <i class="fas fa-comments"></i>
+                                            </div>
+                                            <h6>Коммуникация</h6>
+                                        </div>
+                                        <p>Отправка уведомлений и важной информации о платформе</p>
+                                    </div>
+
+                                    <div class="purpose-item">
+                                        <div class="purpose-header">
+                                            <div class="purpose-icon">
+                                                <i class="fas fa-chart-line"></i>
+                                            </div>
+                                            <h6>Аналитика</h6>
+                                        </div>
+                                        <p>Улучшение работы платформы и пользовательского опыта</p>
+                                    </div>
+
+                                    <div class="purpose-item">
+                                        <div class="purpose-header">
+                                            <div class="purpose-icon">
+                                                <i class="fas fa-shield-alt"></i>
+                                            </div>
+                                            <h6>Безопасность</h6>
+                                        </div>
+                                        <p>Защита платформы от мошенничества и злоупотреблений</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div id="data-protection" class="content-section-item">
+                            <h2 class="section-number">4</h2>
+                            <div class="section-content">
+                                <h3>Защита данных</h3>
+                                <p>Мы реализовали комплексные меры безопасности для защиты ваших данных.</p>
+
+                                <div class="security-measures">
+                                    <div class="security-level">
+                                        <h5>Технические меры</h5>
+                                        <div class="measures-grid">
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-lock"></i>
+                                                </div>
+                                                <span>Шифрование данных</span>
+                                            </div>
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-firewall"></i>
+                                                </div>
+                                                <span>Защищенные серверы</span>
+                                            </div>
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-backup"></i>
+                                                </div>
+                                                <span>Регулярное резервное копирование</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="security-level">
+                                        <h5>Организационные меры</h5>
+                                        <div class="measures-grid">
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-user-shield"></i>
+                                                </div>
+                                                <span>Ограниченный доступ</span>
+                                            </div>
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-file-contract"></i>
+                                                </div>
+                                                <span>Соглашения о конфиденциальности</span>
+                                            </div>
+                                            <div class="measure-item">
+                                                <div class="measure-icon">
+                                                    <i class="fas fa-graduation-cap"></i>
+                                                </div>
+                                                <span>Обучение сотрудников</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="security-notice">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <p>Несмотря на все принятые меры, ни один метод передачи данных через интернет или метод электронного хранения не является на 100% безопасным.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 5 -->
+                        <div id="data-sharing" class="content-section-item">
+                            <h2 class="section-number">5</h2>
+                            <div class="section-content">
+                                <h3>Передача данных</h3>
+                                <p>Мы не продаем ваши персональные данные третьим лицам.</p>
+
+                                <div class="sharing-scenarios">
+                                    <div class="scenario-item authorized">
+                                        <div class="scenario-icon">
+                                            <i class="fas fa-user-check"></i>
+                                        </div>
+                                        <div class="scenario-content">
+                                            <h6>С вашего согласия</h6>
+                                            <p>Передача данных работодателям при отклике на вакансию</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="scenario-item legal">
+                                        <div class="scenario-icon">
+                                            <i class="fas fa-balance-scale"></i>
+                                        </div>
+                                        <div class="scenario-content">
+                                            <h6>По законным требованиям</h6>
+                                            <p>В ответ на официальные запросы государственных органов</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="scenario-item service">
+                                        <div class="scenario-icon">
+                                            <i class="fas fa-server"></i>
+                                        </div>
+                                        <div class="scenario-content">
+                                            <h6>Сервис-провайдерам</h6>
+                                            <p>Партнерам, помогающим в работе платформы (хостинг, аналитика)</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="international-transfer">
+                                    <div class="transfer-icon">
+                                        <i class="fas fa-globe-europe"></i>
+                                    </div>
+                                    <div class="transfer-content">
+                                        <h5>Международная передача</h5>
+                                        <p>Ваши данные хранятся и обрабатываются на территории Российской Федерации в соответствии с законодательством РФ.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 6 -->
+                        <div id="user-rights" class="content-section-item">
+                            <h2 class="section-number">6</h2>
+                            <div class="section-content">
+                                <h3>Права пользователей</h3>
+                                <p>Вы имеете следующие права в отношении ваших персональных данных:</p>
+
+                                <div class="rights-grid">
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на доступ</h6>
+                                            <p>Получить информацию о том, какие ваши данные мы обрабатываем</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-edit"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на исправление</h6>
+                                            <p>Изменить неточные или неполные персональные данные</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-trash"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на удаление</h6>
+                                            <p>Удалить ваши персональные данные в определенных случаях</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-ban"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на ограничение</h6>
+                                            <p>Ограничить обработку ваших персональных данных</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на перенос</h6>
+                                            <p>Получить ваши данные в структурированном формате</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="right-item">
+                                        <div class="right-icon">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                        <div class="right-content">
+                                            <h6>Право на возражение</h6>
+                                            <p>Возражать против обработки ваших персональных данных</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="rights-exercise">
+                                    <div class="exercise-icon">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                    <div class="exercise-content">
+                                        <h5>Как реализовать ваши права</h5>
+                                        <p>Для реализации ваших прав обратитесь в нашу службу поддержки через личный кабинет или по email: <strong>privacy@techtalenthub.ru</strong></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 7 -->
+                        <div id="cookies" class="content-section-item">
+                            <h2 class="section-number">7</h2>
+                            <div class="section-content">
+                                <h3>Файлы cookie</h3>
+                                <p>Мы используем файлы cookie для улучшения работы платформы.</p>
+
+                                <div class="cookies-types">
+                                    <div class="cookie-type">
+                                        <div class="cookie-header">
+                                            <h6>Необходимые cookies</h6>
+                                            <span class="cookie-essential">Обязательные</span>
+                                        </div>
+                                        <p>Обеспечивают базовую функциональность платформы</p>
+                                        <div class="cookie-icon">
+                                            <i class="fas fa-cog"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="cookie-type">
+                                        <div class="cookie-header">
+                                            <h6>Функциональные cookies</h6>
+                                            <span class="cookie-functional">Опциональные</span>
+                                        </div>
+                                        <p>Запоминают ваши предпочтения и настройки</p>
+                                        <div class="cookie-icon">
+                                            <i class="fas fa-user-cog"></i>
+                                        </div>
+                                    </div>
+
+                                    <div class="cookie-type">
+                                        <div class="cookie-header">
+                                            <h6>Аналитические cookies</h6>
+                                            <span class="cookie-analytical">Опциональные</span>
+                                        </div>
+                                        <p>Помогают нам понимать, как используется платформа</p>
+                                        <div class="cookie-icon">
+                                            <i class="fas fa-chart-pie"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cookie-control">
+                                    <div class="control-icon">
+                                        <i class="fas fa-sliders-h"></i>
+                                    </div>
+                                    <div class="control-content">
+                                        <h5>Управление cookies</h5>
+                                        <p>Вы можете управлять настройками cookies через ваш браузер. Однако отключение некоторых cookies может повлиять на функциональность платформы.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Section 8 -->
+                        <div id="changes" class="content-section-item">
+                            <h2 class="section-number">8</h2>
+                            <div class="section-content">
+                                <h3>Изменения политики</h3>
+                                <p>Мы можем обновлять эту политику конфиденциальности.</p>
+
+                                <div class="change-process">
+                                    <div class="change-step">
+                                        <div class="step-indicator">
+                                            <div class="step-number">1</div>
+                                        </div>
+                                        <div class="step-content">
+                                            <h6>Уведомление об изменениях</h6>
+                                            <p>Уведомляем пользователей об изменениях за 30 дней до их вступления в силу</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="change-step">
+                                        <div class="step-indicator">
+                                            <div class="step-number">2</div>
+                                        </div>
+                                        <div class="step-content">
+                                            <h6>Обзор изменений</h6>
+                                            <p>Предоставляем возможность ознакомиться с новой версией политики</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="change-step">
+                                        <div class="step-indicator">
+                                            <div class="step-number">3</div>
+                                        </div>
+                                        <div class="step-content">
+                                            <h6>Продолжение использования</h6>
+                                            <p>Продолжение использования платформы означает принятие изменений</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Section -->
+                        <div class="contact-section mt-5">
+                            <div class="contact-card">
+                                <h4><i class="fas fa-headset me-2"></i>Вопросы и контакты</h4>
+                                <p>Если у вас есть вопросы о нашей политике конфиденциальности, свяжитесь с нами:</p>
+
+                                <div class="contact-info">
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Email</strong>
+                                            <p>privacy@techtalenthub.ru</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="contact-item">
+                                        <div class="contact-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div>
+                                            <strong>Время ответа</strong>
+                                            <p>В течение 3 рабочих дней</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="contact-actions">
+                                    <a href="{% url 'home' %}" class="btn btn-primary-lg">
+                                        <i class="fas fa-home me-2"></i>На главную
+                                    </a>
+                                    <a href="{% url 'terms_of_use' %}" class="btn btn-outline-light">
+                                        <i class="fas fa-file-contract me-2"></i>Условия использования
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+:root {
+    --primary-green: #4CAF50;
+    --primary-dark: #1a1a1a;
+    --text-gray: #6c757d;
+    --border-color: #e0e0e0;
+    --shadow-light: 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-medium: 0 8px 25px rgba(0,0,0,0.1);
+    --shadow-heavy: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+/* Privacy Policy Specific Styles */
+.content-section-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+}
+
+.content-section-item.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.principle-item {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.principle-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.principle-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    margin: 0 auto 1.5rem;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.principle-item h6 {
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.principle-item p {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Data Types */
+.data-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+}
+
+.data-type-category {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.data-type-category:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.category-header i {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+}
+
+.category-header h5 {
+    color: var(--primary-dark);
+    margin: 0;
+    font-weight: 700;
+}
+
+.data-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.data-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    color: var(--text-gray);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.data-list li:last-child {
+    border-bottom: none;
+}
+
+.data-list i {
+    color: var(--primary-green);
+    width: 18px;
+    font-size: 1rem;
+}
+
+.consent-box {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d0ebd0 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.consent-box i {
+    color: var(--primary-green);
+    font-size: 2rem;
+    margin-top: 0.2rem;
+}
+
+.consent-box strong {
+    color: var(--primary-dark);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* Usage Purposes */
+.usage-purposes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.purpose-item {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.03);
+    text-align: center;
+}
+
+.purpose-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.purpose-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.purpose-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.purpose-header h6 {
+    color: var(--primary-dark);
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.purpose-item p {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Security Measures */
+.security-measures {
+    margin: 2rem 0;
+}
+
+.security-level {
+    margin-bottom: 2.5rem;
+}
+
+.security-level h5 {
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--primary-green);
+    display: inline-block;
+}
+
+.measures-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.measure-item {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.measure-item:hover {
+    border-color: var(--primary-green);
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.measure-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.measure-item span {
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.security-notice {
+    background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(255, 152, 0, 0.2);
+}
+
+.security-notice i {
+    color: #ff9800;
+    font-size: 2rem;
+    margin-top: 0.2rem;
+}
+
+.security-notice p {
+    margin: 0;
+    color: #e65100;
+    font-weight: 500;
+}
+
+/* Data Sharing */
+.sharing-scenarios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.scenario-item {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    position: relative;
+    box-shadow: var(--shadow-light);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.scenario-item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.scenario-item.authorized {
+    border-left: 5px solid var(--primary-green);
+}
+
+.scenario-item.legal {
+    border-left: 5px solid #ff9800;
+}
+
+.scenario-item.service {
+    border-left: 5px solid #2196f3;
+}
+
+.scenario-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.scenario-item.authorized .scenario-icon {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+}
+
+.scenario-item.legal .scenario-icon {
+    background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+}
+
+.scenario-item.service .scenario-icon {
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+}
+
+.scenario-content h6 {
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.scenario-content p {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.international-transfer {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(33, 150, 243, 0.2);
+}
+
+.transfer-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.transfer-content h5 {
+    color: #1976d2;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.transfer-content p {
+    margin: 0;
+    color: #0d47a1;
+}
+
+/* User Rights */
+.rights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.right-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.right-item:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.right-icon {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.right-content h6 {
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.right-content p {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.rights-exercise {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(156, 39, 176, 0.2);
+}
+
+.exercise-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.exercise-content h5 {
+    color: #7b1fa2;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.exercise-content p {
+    margin: 0;
+    color: #4a148c;
+}
+
+/* Cookies */
+.cookies-types {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.cookie-type {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.4s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.03);
+}
+
+.cookie-type:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.cookie-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.cookie-header h6 {
+    color: var(--primary-dark);
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.cookie-essential, .cookie-functional, .cookie-analytical {
+    padding: 0.25rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.cookie-essential {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.cookie-functional {
+    background: #e8f5e8;
+    color: var(--primary-green);
+}
+
+.cookie-analytical {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.cookie-type p {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+}
+
+.cookie-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    margin: 0 auto;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.cookie-control {
+    background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2.5rem 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0, 150, 136, 0.2);
+}
+
+.control-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.control-content h5 {
+    color: #00796b;
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+}
+
+.control-content p {
+    margin: 0;
+    color: #004d40;
+}
+
+/* Change Process */
+.change-process {
+    margin: 2rem 0;
+}
+
+.change-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 16px;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-light);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.change-step:hover {
+    border-color: var(--primary-green);
+    transform: translateX(10px);
+    box-shadow: var(--shadow-medium);
+}
+
+.step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.step-number {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.step-content h6 {
+    color: var(--primary-dark);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.step-content p {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Contact Section */
+.contact-section {
+    margin-top: 4rem;
+}
+
+.contact-card {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: var(--shadow-heavy);
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.contact-card h4 {
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.contact-card h4 i {
+    color: var(--primary-green);
+}
+
+.contact-card > p {
+    color: var(--text-gray);
+    font-size: 1.1rem;
+    margin-bottom: 2.5rem;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.contact-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+}
+
+.contact-item strong {
+    color: var(--primary-dark);
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 1rem;
+}
+
+.contact-item p {
+    color: var(--text-gray);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.contact-actions {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary-lg {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+}
+
+.btn-primary-lg:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(76, 175, 80, 0.4);
+    color: white;
+}
+
+.btn-outline-light {
+    border: 2px solid var(--border-color);
+    color: var(--text-gray);
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-light:hover {
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .principles-grid,
+    .data-types,
+    .usage-purposes,
+    .sharing-scenarios,
+    .rights-grid,
+    .cookies-types {
+        grid-template-columns: 1fr;
+    }
+    
+    .contact-actions {
+        flex-direction: column;
+    }
+    
+    .change-step {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .consent-box,
+    .security-notice,
+    .international-transfer,
+    .rights-exercise,
+    .cookie-control {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .contact-info {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Animation for scroll reveal */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Additional utility classes */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.badge-platform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary-green);
+    padding: 0.75rem 1.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.badge-sparkle {
+    width: 30px;
+    height: 30px;
+    background: var(--primary-green);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.last-update {
+    color: var(--text-gray);
+    font-size: 0.95rem;
+    margin-top: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(108, 117, 125, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+}
+
+.content-hero-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: -1;
+}
+
+.bg-element {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(46, 125, 50, 0.05) 100%);
+}
+
+.bg-element.element-1 {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 5%;
+}
+
+.bg-element.element-2 {
+    width: 200px;
+    height: 200px;
+    bottom: 20%;
+    right: 10%;
+}
+
+.bg-element.element-3 {
+    width: 150px;
+    height: 150px;
+    top: 50%;
+    left: 80%;
+}
+
+.toc-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 2rem;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.toc-card h5 {
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toc-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.toc-link {
+    color: var(--text-gray);
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.toc-link:hover {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary-green);
+    transform: translateX(5px);
+}
+
+.content-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-heavy);
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.content-body {
+    padding: 3rem;
+}
+
+.content-section-item {
+    display: flex;
+    gap: 3rem;
+    margin-bottom: 4rem;
+    padding-bottom: 4rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.content-section-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.section-number {
+    font-size: 4rem;
+    font-weight: 900;
+    color: rgba(76, 175, 80, 0.7);
+    line-height: 1;
+    margin: 0;
+    flex-shrink: 0;
+    width: 80px;
+}
+
+.section-content {
+    flex: 1;
+}
+
+.section-content h3 {
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.8rem;
+}
+
+.section-content > p {
+    color: var(--text-gray);
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+/* Hero Section */
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--text-gray);
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    .content-section-item {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .section-number {
+        width: auto;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .content-body {
+        padding: 2rem;
+    }
+}
+</style>
+
+<script>
+// Scroll reveal animation
+document.addEventListener('DOMContentLoaded', function() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+
+    // Observe all content sections
+    document.querySelectorAll('.content-section-item').forEach(item => {
+        observer.observe(item);
+    });
+
+    // Smooth scroll for table of contents
+    document.querySelectorAll('.toc-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+            
+            if (targetElement) {
+                const offsetTop = targetElement.getBoundingClientRect().top + window.pageYOffset - 100;
+                window.scrollTo({
+                    top: offsetTop,
+                    behavior: 'smooth'
+                });
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

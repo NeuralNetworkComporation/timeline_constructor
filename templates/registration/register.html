@@ -1,0 +1,874 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<!-- Якорь для скролла наверх -->
+<a id="top" name="top" style="position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none;"></a>
+
+<!-- Hero Section -->
+<section class="registration-hero" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); padding: 100px 0 60px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 text-center">
+                <div class="badge-platform mb-4">
+                    <span>ОЭЗ «Технополис Москва»</span>
+                    <div class="badge-sparkle">
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                <h1 class="hero-title">
+                    Присоединяйтесь к <span class="text-gradient">TechTalentHub</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Начните карьеру в ведущих технологических компаниях или найдите талантливых специалистов
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Registration Form Section -->
+<section class="registration-section py-5" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="registration-card">
+                    <div class="card-header">
+                        <div class="header-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h3>Создание аккаунта</h3>
+                        <p>Заполните форму ниже для регистрации в системе</p>
+                    </div>
+
+                    <div class="card-body">
+                        <form method="post" class="registration-form" id="registrationForm">
+                            {% csrf_token %}
+
+                            <!-- Basic Information -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                    <h4>Основная информация</h4>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group floating-label">
+                                            {{ form.username|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group floating-label">
+                                            {{ form.email|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group floating-label">
+                                            {{ form.password1|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group floating-label">
+                                            {{ form.password2|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Role Selection -->
+                            <div class="form-section">
+                                <div class="section-header">
+                                    <div class="section-icon">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <h4>Выбор роли</h4>
+                                </div>
+
+                                <div class="role-selection">
+                                    <!-- Скрытое поле для хранения выбранной роли -->
+                                    <input type="hidden" id="id_role" name="role" value="student">
+
+                                    <!-- Role Descriptions -->
+                                    <div class="role-cards">
+                                        <div class="role-card active" data-role="student">
+                                            <div class="role-icon">
+                                                <i class="fas fa-user-graduate"></i>
+                                            </div>
+                                            <h5>Соискатель</h5>
+                                            <p>Ищете работу или стажировку в технологических компаниях</p>
+                                        </div>
+
+                                        <div class="role-card" data-role="hr">
+                                            <div class="role-icon">
+                                                <i class="fas fa-briefcase"></i>
+                                            </div>
+                                            <h5>HR / Работодатель</h5>
+                                            <p>Размещайте вакансии и находите талантливых специалистов</p>
+                                        </div>
+
+                                        <div class="role-card" data-role="university">
+                                            <div class="role-icon">
+                                                <i class="fas fa-university"></i>
+                                            </div>
+                                            <h5>ВУЗ / Образовательное учреждение</h5>
+                                            <p>Создавайте стажировки и сотрудничайте с компаниями</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dynamic Fields Based on Role -->
+                            <div class="dynamic-fields">
+                                <!-- HR Fields -->
+                                <div id="hr-fields" class="role-specific-fields">
+                                    <div class="form-section">
+                                        <div class="section-header">
+                                            <div class="section-icon">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <h4>Информация о компании</h4>
+                                        </div>
+
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-info-circle"></i>
+                                            После регистрации ваш аккаунт будет отправлен на подтверждение администратором.
+                                        </div>
+
+                                        <div class="form-group floating-label">
+                                            {{ form.company_name|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- University Fields -->
+                                <div id="university-fields" class="role-specific-fields">
+                                    <div class="form-section">
+                                        <div class="section-header">
+                                            <div class="section-icon">
+                                                <i class="fas fa-graduation-cap"></i>
+                                            </div>
+                                            <h4>Информация об учреждении</h4>
+                                        </div>
+
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-info-circle"></i>
+                                            После регистрации ваш аккаунт будет отправлен на подтверждение администратором.
+                                        </div>
+
+                                        <div class="form-group floating-label">
+                                            {{ form.institution_name|as_crispy_field }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Student Info -->
+                                <div id="student-info" class="role-specific-fields">
+                                    <div class="form-section">
+                                        <div class="section-header">
+                                            <div class="section-icon">
+                                                <i class="fas fa-search"></i>
+                                            </div>
+                                            <h4>Информация для соискателя</h4>
+                                        </div>
+
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-check-circle"></i>
+                                            Как соискатель вы сможете просматривать вакансии, откликаться на них и управлять своими заявками.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary-lg w-100" id="submitBtn">
+                                    <i class="fas fa-user-plus me-2"></i>Создать аккаунт
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="auth-redirect text-center mt-4">
+                            <p>Уже есть аккаунт? <a href="{% url 'role_selection' %}">Войдите в систему</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section py-5" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <span class="section-badge">Преимущества</span>
+                <h2 class="section-title">Почему стоит присоединиться?</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h5>Мгновенный доступ</h5>
+                    <p>Получите доступ к сотням вакансий и стажировок сразу после регистрации</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h5>Проверенные компании</h5>
+                    <p>Все работодатели - официальные резиденты ОЭЗ «Технополис Москва»</p>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-6">
+                <div class="benefit-card">
+                    <div class="benefit-icon">
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h5>Быстрый отклик</h5>
+                    <p>HR просматривают отклики в течение 24 часов и быстро выходят на связь</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+:root {
+    --primary-green: #4caf50;
+    --primary-dark: #1a1a1a;
+    --text-gray: #666;
+    --light-gray: #f8f9fa;
+    --border-color: #e9ecef;
+    --shadow-light: 0 5px 15px rgba(0,0,0,0.08);
+    --shadow-medium: 0 10px 30px rgba(0,0,0,0.12);
+    --shadow-heavy: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* Registration Hero */
+.registration-hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.badge-platform {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid #c8e6c9;
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+.badge-sparkle {
+    color: #ff9800;
+    animation: sparkle 2s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(180deg); }
+}
+
+.hero-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-dark);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    animation: fadeInUp 0.8s ease-out 0.5s forwards;
+    opacity: 0;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem;
+    color: var(--text-gray);
+    margin-bottom: 1rem;
+    line-height: 1.4;
+    font-weight: 500;
+    animation: fadeInUp 0.8s ease-out 0.7s forwards;
+    opacity: 0;
+}
+
+/* Registration Card */
+.registration-card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: var(--shadow-heavy);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    animation: fadeInUp 0.8s ease-out 0.9s forwards;
+    opacity: 0;
+}
+
+.card-header {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    color: white;
+    padding: 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: rotate 15s linear infinite;
+}
+
+.header-icon {
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    position: relative;
+    z-index: 2;
+}
+
+.card-header h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.card-header p {
+    opacity: 0.9;
+    margin: 0;
+    position: relative;
+    z-index: 2;
+}
+
+.card-body {
+    padding: 2.5rem;
+}
+
+/* Form Sections */
+.form-section {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.section-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 1.3rem;
+}
+
+.section-header h4 {
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Form Elements */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    height: auto;
+}
+
+.form-control:focus {
+    border-color: var(--primary-green);
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+/* Role Selection */
+.role-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.role-card {
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.role-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(76, 175, 80, 0.05), transparent);
+    transition: left 0.6s ease;
+}
+
+.role-card:hover::before {
+    left: 100%;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-green);
+    box-shadow: var(--shadow-medium);
+}
+
+.role-card.active {
+    border-color: var(--primary-green);
+    background: rgba(76, 175, 80, 0.05);
+}
+
+.role-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 1.5rem;
+    margin: 0 auto 1rem;
+    transition: all 0.3s ease;
+}
+
+.role-card:hover .role-icon,
+.role-card.active .role-icon {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    color: white;
+    transform: scale(1.1);
+}
+
+.role-card h5 {
+    color: var(--primary-dark);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.role-card p {
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/* Dynamic Fields */
+.role-specific-fields {
+    display: none;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.alert {
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.alert i {
+    margin-top: 0.1rem;
+    flex-shrink: 0;
+}
+
+.alert-warning {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.alert-info {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+/* Form Actions */
+.form-actions {
+    margin-top: 2rem;
+}
+
+.btn-primary-lg {
+    background: var(--primary-green);
+    border: 2px solid var(--primary-green);
+    color: white;
+    padding: 1rem 2rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary-lg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary-lg:hover::before {
+    left: 100%;
+}
+
+.btn-primary-lg:hover {
+    background: #45a049;
+    border-color: #45a049;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+/* Auth Redirect */
+.auth-redirect {
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.auth-redirect p {
+    color: var(--text-gray);
+    margin: 0;
+}
+
+.auth-redirect a {
+    color: var(--primary-green);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.auth-redirect a:hover {
+    color: #2e7d32;
+    text-decoration: underline;
+}
+
+/* Benefits Section */
+.benefits-section {
+    position: relative;
+}
+
+.section-badge {
+    display: inline-block;
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--primary-green);
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.section-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #1a1a1a 0%, #4caf50 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.benefit-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    text-align: center;
+    border: 1px solid var(--border-color);
+    transition: all 0.4s ease;
+    height: 100%;
+    box-shadow: var(--shadow-light);
+}
+
+.benefit-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.benefit-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-green);
+    font-size: 2rem;
+    margin: 0 auto 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.benefit-card:hover .benefit-icon {
+    background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+    color: white;
+    transform: scale(1.1) rotate(5deg);
+}
+
+.benefit-card h5 {
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.benefit-card p {
+    color: var(--text-gray);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 2.2rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .role-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .section-title {
+        font-size: 2rem;
+    }
+
+    .benefit-card {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .registration-hero {
+        padding: 80px 0 40px;
+    }
+
+    .hero-title {
+        font-size: 1.8rem;
+    }
+
+    .card-header {
+        padding: 2rem 1.5rem;
+    }
+
+    .section-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Role selection functionality
+    const roleInput = document.getElementById('id_role');
+    const roleCards = document.querySelectorAll('.role-card');
+    const hrFields = document.getElementById('hr-fields');
+    const universityFields = document.getElementById('university-fields');
+    const studentInfo = document.getElementById('student-info');
+
+    // Function to toggle role-specific fields
+    function toggleFields() {
+        const selectedRole = roleInput.value;
+
+        // Hide all fields
+        hrFields.style.display = 'none';
+        universityFields.style.display = 'none';
+        studentInfo.style.display = 'none';
+
+        // Remove active class from all role cards
+        roleCards.forEach(card => {
+            card.classList.remove('active');
+        });
+
+        // Show corresponding fields and activate card
+        if (selectedRole === 'hr') {
+            hrFields.style.display = 'block';
+            document.querySelector('.role-card[data-role="hr"]').classList.add('active');
+        } else if (selectedRole === 'university') {
+            universityFields.style.display = 'block';
+            document.querySelector('.role-card[data-role="university"]').classList.add('active');
+        } else {
+            // По умолчанию - соискатель
+            roleInput.value = 'student';
+            studentInfo.style.display = 'block';
+            document.querySelector('.role-card[data-role="student"]').classList.add('active');
+        }
+    }
+
+    // Initialize on page load
+    toggleFields();
+
+    // Handle role card clicks
+    roleCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const role = this.getAttribute('data-role');
+            roleInput.value = role;
+            toggleFields();
+        });
+    });
+
+    // Form validation and enhancement
+    const form = document.getElementById('registrationForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const inputs = form.querySelectorAll('.form-control');
+
+    inputs.forEach(input => {
+        // Add floating label effect
+        input.addEventListener('focus', function() {
+            this.parentElement.classList.add('focused');
+        });
+
+        input.addEventListener('blur', function() {
+            if (this.value === '') {
+                this.parentElement.classList.remove('focused');
+            }
+        });
+
+        // Check initial state
+        if (input.value !== '') {
+            input.parentElement.classList.add('focused');
+        }
+    });
+
+    // Обработчик отправки формы - скролл наверх
+    form.addEventListener('submit', function(e) {
+        // Прокрутка наверх перед отправкой
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+
+        // Визуальная индикация загрузки
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Создание аккаунта...';
+        submitBtn.disabled = true;
+    });
+
+    // Добавляем обработчик для предотвращения повторной отправки
+    let formSubmitted = false;
+    form.addEventListener('submit', function(e) {
+        if (formSubmitted) {
+            e.preventDefault();
+            return;
+        }
+        formSubmitted = true;
+    });
+
+    // Add some interactive animations
+    const benefitCards = document.querySelectorAll('.benefit-card');
+    benefitCards.forEach((card, index) => {
+        card.style.animation = `fadeInUp 0.8s ease-out ${0.5 + index * 0.2}s forwards`;
+        card.style.opacity = '0';
+    });
+
+    // Принудительный скролл наверх при загрузке страницы регистрации
+    window.scrollTo({
+        top: 0,
+        behavior: 'instant'
+    });
+});
+
+// Обработчик для кнопки "Назад"
+window.addEventListener('pageshow', function(e) {
+    if (e.persisted || (window.performance && window.performance.navigation.type === 2)) {
+        window.scrollTo(0, 0);
+    }
+});
+</script>
+{% endblock %}

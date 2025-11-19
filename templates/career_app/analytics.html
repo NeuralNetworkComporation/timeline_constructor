@@ -1,0 +1,648 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="bi bi-graph-up"></i> Аналитика системы</h1>
+
+    </div>
+
+    <!-- Фильтры -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="bi bi-funnel"></i> Фильтры аналитики</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" id="analyticsFilter">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Период</label>
+                        <select name="period" class="form-select" onchange="this.form.submit()">
+                            <option value="7" {% if period == "7" %}selected{% endif %}>7 дней</option>
+                            <option value="30" {% if period == "30" %}selected{% endif %}>30 дней</option>
+                            <option value="90" {% if period == "90" %}selected{% endif %}>3 месяца</option>
+                            <option value="365" {% if period == "365" %}selected{% endif %}>Год</option>
+                            <option value="all" {% if period == "all" %}selected{% endif %}>Все время</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Категория</label>
+                        <select name="category" class="form-select" onchange="this.form.submit()">
+                            <option value="">Все категории</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"i" %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Компания</label>
+                        <select name="company" class="form-select" onchange="this.form.submit()">
+                            <option value="">Все компании</option>
+                            {% for comp in companies %}
+                            <option value="{{ comp.id }}" {% if selected_company == comp.id|stringformat:"i" %}selected{% endif %}>
+                                {{ comp.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Статус</label>
+                        <select name="status" class="form-select" onchange="this.form.submit()">
+                            <option value="">Все статусы</option>
+                            <option value="published" {% if selected_status == "published" %}selected{% endif %}>Опубликовано</option>
+                            <option value="moderation" {% if selected_status == "moderation" %}selected{% endif %}>На модерации</option>
+                            <option value="closed" {% if selected_status == "closed" %}selected{% endif %}>Закрыто</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ключевые метрики -->
+    <div class="row mb-4">
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-primary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ total_vacancies }}</div>
+                            <div>Всего вакансий</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-briefcase fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">Активных: {{ active_vacancies }}</span>
+                    <span class="small {% if vacancy_growth >= 0 %}text-success{% else %}text-warning{% endif %}">
+                        {% if vacancy_growth >= 0 %}+{% endif %}{{ vacancy_growth }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-success text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ total_applications }}</div>
+                            <div>Всего откликов</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-envelope-check fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">Новых: {{ new_applications }}</span>
+                    <span class="small {% if application_growth >= 0 %}text-success{% else %}text-warning{% endif %}">
+                        {% if application_growth >= 0 %}+{% endif %}{{ application_growth }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-warning text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ total_companies }}</div>
+                            <div>Компаний</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-building fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">Активных: {{ active_companies }}</span>
+                    <span class="small {% if company_growth >= 0 %}text-success{% else %}text-warning{% endif %}">
+                        {% if company_growth >= 0 %}+{% endif %}{{ company_growth }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-info text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ conversion_rate }}%</div>
+                            <div>Конверсия</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-graph-up-arrow fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">Отклики/Вакансии</span>
+                    <span class="small">
+                        {% if conversion_rate > 50 %}
+                        <i class="bi bi-arrow-up-circle text-success"></i>
+                        {% else %}
+                        <i class="bi bi-arrow-down-circle text-warning"></i>
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-secondary text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">{{ total_internships }}</div>
+                            <div>Стажировок</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-mortarboard fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">Активных: {{ active_internships }}</span>
+                    <span class="small">{{ internship_applications }} откликов</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-2 col-md-4">
+            <div class="card bg-dark text-white mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <div class="fs-4 fw-bold">
+                                {% if avg_response_time %}
+                                {{ avg_response_time }}ч
+                                {% else %}
+                                -
+                                {% endif %}
+                            </div>
+                            <div>Среднее время отклика</div>
+                        </div>
+                        <div class="align-self-center">
+                            <i class="bi bi-clock fs-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex align-items-center justify-content-between">
+                    <span class="small">После публикации</span>
+                    <span class="small">
+                        <i class="bi bi-lightning-charge text-info"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Статистика по статусам -->
+    <div class="row">
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-speedometer2"></i> Эффективность платформы</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-primary">{{ conversion_rate }}%</h3>
+                                <p class="mb-0 text-muted">Общая конверсия</p>
+                            </div>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-success">{{ internship_conversion }}%</h3>
+                                <p class="mb-0 text-muted">Конверсия стажировок</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-warning">
+                                    {% if avg_response_time %}
+                                    {{ avg_response_time }}ч
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </h3>
+                                <p class="mb-0 text-muted">Скорость отклика</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-info">{{ active_companies }}</h3>
+                                <p class="mb-0 text-muted">Активных работодателей</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Детальная аналитика -->
+    <div class="row">
+        <!-- Статистика по компаниям -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-building"></i> Активность компаний</h5>
+                    <span class="badge bg-primary">Топ 10</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Компания</th>
+                                    <th>Вакансии</th>
+                                    <th>Отклики</th>
+                                    <th>Конверсия</th>
+                                    <th>Эффективность</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in company_stats %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="flex-shrink-0">
+                                                <i class="bi bi-building text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <strong>{{ item.company__name|default:"Не указана" }}</strong>
+                                                {% if item.avg_salary %}
+                                                <br><small class="text-muted">Ср. зарплата: {{ item.avg_salary|floatformat:0 }} ₽</small>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary rounded-pill">{{ item.vacancy_count }}</span>
+                                        <small class="text-muted d-block">активных: {{ item.published_vacancies }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success rounded-pill">{{ item.application_count }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 6px;">
+                                            <div class="progress-bar bg-info" style="width: {{ item.conversion_rate }}%"></div>
+                                        </div>
+                                        <small class="text-muted">{{ item.conversion_rate|floatformat:1 }}%</small>
+                                    </td>
+                                    <td>
+                                        {% if item.efficiency > 70 %}
+                                        <span class="badge bg-success">Высокая</span>
+                                        {% elif item.efficiency > 40 %}
+                                        <span class="badge bg-warning">Средняя</span>
+                                        {% else %}
+                                        <span class="badge bg-danger">Низкая</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Нет данных для отображения</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика по вакансиям -->
+        <div class="col-lg-6">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-briefcase"></i> Популярные вакансии</h5>
+                    <span class="badge bg-primary">Топ 10</span>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Вакансия</th>
+                                    <th>Компания</th>
+                                    <th>Отклики</th>
+                                    <th>CTR</th>
+                                    <th>Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in popular_vacancies %}
+                                <tr>
+                                    <td>
+                                        <strong title="{{ item.title }}">{{ item.title|truncatewords:4 }}</strong>
+                                        {% if item.salary %}
+                                        <br><small class="text-muted">{{ item.salary }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ item.company__name|default:"Не указана" }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success rounded-pill">{{ item.application_count }}</span>
+                                        <small class="text-muted d-block">просмотров: {{ item.view_count }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info rounded-pill">{{ item.ctr|floatformat:1 }}%</span>
+                                    </td>
+                                    <td>
+                                        {% if item.status == 'published' %}
+                                        <span class="badge bg-success">Активна</span>
+                                        {% elif item.status == 'closed' %}
+                                        <span class="badge bg-secondary">Закрыта</span>
+                                        {% else %}
+                                        <span class="badge bg-warning">{{ item.status }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">Нет данных для отображения</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Географическая аналитика -->
+    {% if location_stats %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-geo-alt"></i> География вакансий</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Город/Регион</th>
+                                    <th>Количество вакансий</th>
+                                    <th>Средняя зарплата</th>
+                                    <th>Доля рынка</th>
+                                    <th>Конверсия</th>
+                                    <th>Тренд</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for location in location_stats %}
+                                <tr>
+                                    <td>
+                                        <i class="bi bi-geo-alt text-primary"></i>
+                                        {{ location.location }}
+                                    </td>
+                                    <td>{{ location.vacancy_count }}</td>
+                                    <td>
+                                        {% if location.avg_salary %}
+                                        {{ location.avg_salary|floatformat:0 }} ₽
+                                        {% else %}
+                                        <span class="text-muted">—</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar" style="width: {{ location.market_share }}%"></div>
+                                        </div>
+                                        <small>{{ location.market_share|floatformat:1 }}%</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info rounded-pill">{{ location.conversion_rate|floatformat:1 }}%</span>
+                                    </td>
+                                    <td>
+                                        {% if location.trend > 0 %}
+                                        <i class="bi bi-arrow-up-circle text-success"></i>
+                                        <span class="text-success">+{{ location.trend }}%</span>
+                                        {% elif location.trend < 0 %}
+                                        <i class="bi bi-arrow-down-circle text-danger"></i>
+                                        <span class="text-danger">{{ location.trend }}%</span>
+                                        {% else %}
+                                        <i class="bi bi-dash-circle text-muted"></i>
+                                        <span class="text-muted">0%</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Аналитика стажировок -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-mortarboard"></i> Аналитика стажировок</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-primary">{{ total_internships }}</h3>
+                                <p class="mb-0 text-muted">Всего стажировок</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-success">{{ internship_applications }}</h3>
+                                <p class="mb-0 text-muted">Откликов на стажировки</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-warning">{{ active_internships }}</h3>
+                                <p class="mb-0 text-muted">Активных стажировок</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="border rounded p-3 bg-light">
+                                <h3 class="text-info">{{ internship_conversion }}%</h3>
+                                <p class="mb-0 text-muted">Конверсия стажировок</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Timeline Chart
+    const timelineCtx = document.getElementById('timelineChart').getContext('2d');
+    const timelineChart = new Chart(timelineCtx, {
+        type: 'line',
+        data: {
+            labels: {{ timeline_labels|safe }},
+            datasets: [
+                {
+                    label: 'Вакансии',
+                    data: {{ timeline_vacancies }},
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                },
+                {
+                    label: 'Отклики',
+                    data: {{ timeline_applications }},
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 2,
+                    tension: 0.4,
+                    fill: true
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                title: {
+                    display: true,
+                    text: 'Динамика вакансий и откликов'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+
+    // Categories Chart
+    const categoriesCtx = document.getElementById('categoriesChart').getContext('2d');
+    const categoriesChart = new Chart(categoriesCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ category_labels|safe }},
+            datasets: [{
+                data: {{ category_data }},
+                backgroundColor: [
+                    '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                    '#9966FF', '#FF9F40', '#8B5CF6', '#10B981'
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 15
+                    }
+                }
+            }
+        }
+    });
+
+    // Status Chart
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        const statusChart = new Chart(statusCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ status_labels|safe }},
+                datasets: [{
+                    label: 'Количество откликов',
+                    data: {{ status_data }},
+                    backgroundColor: [
+                        '#36A2EB', '#4BC0C0', '#FFCE56', '#FF6384', '#9966FF'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+
+// Функции экспорта - ИСПРАВЛЕННЫЕ
+function exportToExcel() {
+    const filters = new URLSearchParams(window.location.search);
+    window.location.href = `/analytics/export/excel/?${filters.toString()}`;
+}
+
+function generatePDF() {
+    const filters = new URLSearchParams(window.location.search);
+    window.location.href = `/analytics/export/pdf/?${filters.toString()}`;
+}
+</script>
+<style>
+.card {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border: 1px solid #e3e6f0;
+}
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    font-weight: 600;
+}
+.progress {
+    background-color: #eaecf4;
+}
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+.border.rounded {
+    transition: transform 0.2s;
+}
+.border.rounded:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

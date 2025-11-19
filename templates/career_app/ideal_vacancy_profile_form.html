@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">💼 Создание идеального профиля вакансии</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Опишите идеальную работу, и наша ИИ-система найдет лучшие вакансии
+                        на основе смыслового анализа.
+                    </p>
+
+                    <form method="post" id="vacancyProfileForm">
+                        {% csrf_token %}
+
+                        <!-- Основная информация -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.title.label }} *</label>
+                                    {{ form.title }}
+                                    {% if form.title.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.title.errors %}
+                                        <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.min_match_percentage.label }} *</label>
+                                    {{ form.min_match_percentage }}
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.max_vacancies.label }} *</label>
+                                    {{ form.max_vacancies }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Категории -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.main_category.label }} *</label>
+                                    {{ form.main_category }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.subcategory.label }} *</label>
+                                    {{ form.subcategory }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Опыт и образование -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.experience_level.label }} *</label>
+                                    {{ form.experience_level }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.education_level.label }} *</label>
+                                    {{ form.education_level }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Стек технологий -->
+                        <div class="mb-4">
+                            <label class="form-label">{{ form.tech_stack.label }}</label>
+                            {{ form.tech_stack }}
+                            <div class="form-text">{{ form.tech_stack.help_text }}</div>
+                        </div>
+
+                        <!-- Зарплата и локация -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.desired_salary.label }}</label>
+                                    {{ form.desired_salary }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">{{ form.location_preferences.label }}</label>
+                                    {{ form.location_preferences }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'ai_search_dashboard' %}" class="btn btn-secondary me-md-2">Отмена</a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.pk %}🔄 Обновить и запустить поиск{% else %}💼 Запустить умный поиск вакансий{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Подсказки -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h5>💡 Советы по заполнению:</h5>
+                    <ul class="text-muted">
+                        <li>Начните с выбора основной категории и подкатегории</li>
+                        <li>Укажите стек технологий, с которыми хотите работать</li>
+                        <li>Чем точнее вы опишете требования, тем лучше будут результаты поиска</li>
+                        <li>ИИ учитывает все указанные параметры при поиске вакансий</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Упрощенный JavaScript для динамической загрузки подкатегорий -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const mainCategorySelect = document.getElementById('id_main_category');
+    const subcategorySelect = document.getElementById('id_subcategory');
+
+    // Функция для загрузки подкатегорий
+    function loadSubcategories(mainCategoryId) {
+        if (mainCategoryId) {
+            fetch(`{% url 'get_subcategories' %}?main_category_id=${mainCategoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    subcategorySelect.innerHTML = '<option value="">--- Выберите подкатегорию ---</option>';
+                    data.subcategories.forEach(subcat => {
+                        const option = document.createElement('option');
+                        option.value = subcat.id;
+                        option.textContent = subcat.name;
+                        subcategorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading subcategories:', error);
+                    subcategorySelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                });
+        } else {
+            subcategorySelect.innerHTML = '<option value="">--- Сначала выберите основную категорию ---</option>';
+        }
+    }
+
+    // Обработчик изменения основной категории
+    mainCategorySelect.addEventListener('change', function() {
+        const mainCategoryId = this.value;
+        loadSubcategories(mainCategoryId);
+    });
+
+    // При загрузке страницы, если есть выбранная основная категория, загружаем подкатегории
+    const initialMainCategory = mainCategorySelect.value;
+    if (initialMainCategory) {
+        loadSubcategories(initialMainCategory);
+    }
+});
+</script>
+
+<style>
+.form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+</style>
+{% endblock %}

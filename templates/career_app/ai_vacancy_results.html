@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>💼 Результаты поиска вакансий</h2>
+        <a href="{% url 'ai_search_dashboard' %}" class="btn btn-outline-secondary">← Назад к поиску</a>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">{{ profile.title }}</h5>
+            <p class="card-text"><strong>Идеальная должность:</strong> {{ profile.ideal_position }}</p>
+            <p class="card-text">
+                <small class="text-muted">
+                    Минимальное совпадение: {{ profile.min_match_percentage }}% |
+                    Найдено вакансий: {{ matches|length }}
+                </small>
+            </p>
+        </div>
+    </div>
+
+    {% if matches %}
+    <div class="row">
+        {% for match in matches %}
+        <div class="col-md-6 mb-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title">{{ match.matched_vacancy.title }}</h5>
+                        <span class="badge bg-success fs-6">{{ match.match_percentage }}%</span>
+                    </div>
+
+                    <p class="card-text">
+                        <strong>Компания:</strong> {{ match.matched_vacancy.company.name }}<br>
+                        <strong>Описание:</strong> {{ match.matched_vacancy.description|truncatewords:20 }}
+                    </p>
+
+                    {% if match.match_details.explanation %}
+                    <p class="card-text">
+                        <small>{{ match.match_details.explanation }}</small>
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'vacancy_detail' match.matched_vacancy.id %}" class="btn btn-primary btn-sm">
+                            👀 Посмотреть вакансию
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <h5>Вакансии не найдены</h5>
+        <p>Попробуйте изменить критерии поиска или уменьшить минимальный процент совпадения.</p>
+        <a href="{% url 'create_ideal_vacancy_profile' %}" class="btn btn-outline-primary">
+            Создать новый профиль поиска
+        </a>
+    </div>
+
+    {% endif %}
+</div>
+<div class="alert alert-info">
+    <h4>Результаты поиска для: "{{ profile.title }}"</h4>
+    <p>Минимальный порог: {{ profile.min_match_percentage }}%</p>
+    <a href="{% url 'run_ai_search' profile.id %}" class="btn btn-sm btn-warning">
+        🔄 Обновить результаты
+    </a>
+</div>
+{% endblock %}

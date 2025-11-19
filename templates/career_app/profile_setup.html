@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Настройка профиля</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% if applicant_form %}
+                        <h5>Данные для откликов на вакансии</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ applicant_form.first_name|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ applicant_form.last_name|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ applicant_form.email|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ applicant_form.phone|as_crispy_field }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-primary">Сохранить профиль</button>
+                            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Назад</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

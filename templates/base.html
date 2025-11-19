@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TechTalentHub - ОЭЗ «Технополис Москва»{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #4caf50;
+            --primary-dark: #1a1a1a;
+            --text-gray: #666;
+            --light-gray: #f8f9fa;
+            --border-color: #e9ecef;
+            --shadow-light: 0 5px 15px rgba(0,0,0,0.08);
+            --shadow-medium: 0 10px 30px rgba(0,0,0,0.12);
+        }
+
+        /* Enhanced Navigation */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-light);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255, 255, 255, 0.98) !important;
+            padding: 0.75rem 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: var(--primary-dark) !important;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-brand span {
+            color: var(--primary-green);
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .brand-icon {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .nav-link {
+            color: var(--text-gray) !important;
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-green) !important;
+            background: rgba(76, 175, 80, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .nav-link.active {
+            color: var(--primary-green) !important;
+            background: rgba(76, 175, 80, 0.1);
+            font-weight: 600;
+        }
+
+        .nav-link i {
+            width: 16px;
+            text-align: center;
+        }
+
+        .nav-link-badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border-radius: 10px;
+            padding: 0.1rem 0.4rem;
+            font-size: 0.6rem;
+            font-weight: 700;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%280, 0, 0, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .user-dropdown {
+            background: none;
+            border: none;
+            color: var(--text-gray);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .user-dropdown:hover {
+            color: var(--primary-green);
+            background: rgba(76, 175, 80, 0.05);
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .dropdown-menu {
+            border: none;
+            border-radius: 12px;
+            box-shadow: var(--shadow-medium);
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(76, 175, 80, 0.1);
+            color: var(--primary-green);
+        }
+
+        .role-badge {
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2e7d32 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .notification-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 700;
+            position: absolute;
+            top: -5px;
+            right: -5px;
+        }
+
+        /* Mobile menu styles */
+        @media (max-width: 991.98px) {
+            .navbar-collapse {
+                background: white;
+                border-radius: 12px;
+                padding: 1rem;
+                margin-top: 1rem;
+                box-shadow: var(--shadow-medium);
+            }
+
+            .nav-link {
+                padding: 0.75rem 1rem !important;
+                border-radius: 8px;
+                margin: 0.25rem 0;
+            }
+
+            .user-dropdown {
+                width: 100%;
+                justify-content: flex-start;
+                margin: 0.5rem 0;
+            }
+        }
+
+        /* Role-specific styles */
+        .nav-item.admin .nav-link {
+            color: #dc3545 !important;
+        }
+
+        .nav-item.hr .nav-link {
+            color: #0d6efd !important;
+        }
+
+        .nav-item.university .nav-link {
+            color: #6f42c1 !important;
+        }
+
+        .nav-item.student .nav-link {
+            color: #fd7e14 !important;
+        }
+
+
+            /* Стили для футера */
+    .footer {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%) !important;
+    }
+
+    .footer-links a:hover,
+    .footer-legal a:hover,
+    .social-link:hover {
+        color: #4caf50 !important;
+        transform: translateY(-2px);
+    }
+
+    .social-link:hover {
+        background: #4caf50 !important;
+        transform: translateY(-2px);
+    }
+
+    .contact-info i {
+        color: #4caf50;
+    }
+
+    /* Анимации для футера */
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .footer-bg-elements .bg-element {
+        animation: float 6s ease-in-out infinite;
+    }
+
+    .footer-bg-elements .bg-element:nth-child(2) {
+        animation-delay: 2s;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .footer {
+            padding: 3rem 0 1.5rem !important;
+            text-align: center;
+        }
+
+        .footer-legal {
+            text-align: center !important;
+            margin-top: 1rem;
+        }
+
+        .footer-legal a {
+            margin: 0 0.5rem !important;
+            display: inline-block;
+        }
+
+        .contact-info p {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .footer {
+            padding: 2rem 0 1rem !important;
+        }
+
+        .social-links {
+            justify-content: center;
+        }
+
+        .footer-bottom .row {
+            text-align: center;
+        }
+
+        .footer-legal a {
+            display: block;
+            margin: 0.5rem 0 !important;
+        }
+    }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <div class="brand-icon">
+                    <i class="fas fa-rocket"></i>
+                </div>
+                TechTalent<span>Hub</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+    <li class="nav-item">
+        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{% url 'home' %}">
+            <i class="fas fa-home"></i>
+            Главная
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link {% if 'vacancy' in request.path %}active{% endif %}" href="{% url 'vacancy_list' %}">
+            <i class="fas fa-briefcase"></i>
+            Вакансии
+        </a>
+    </li>
+
+    {% if user.is_authenticated %}
+
+        {% if user.userprofile.role == 'admin' %}
+            <li class="nav-item admin">
+                <a class="nav-link" href="{% url 'moderation_list' %}">
+                    <i class="fas fa-shield-alt"></i>
+                    Модерация
+                </a>
+            </li>
+            <li class="nav-item admin">
+                <a class="nav-link" href="{% url 'analytics' %}">
+                    <i class="fas fa-chart-bar"></i>
+                    Аналитика
+                </a>
+            </li>
+        {% elif user.userprofile.role == 'hr' %}
+            <li class="nav-item hr">
+                <a class="nav-link" href="{% url 'create_vacancy' %}">
+                    <i class="fas fa-plus-circle"></i>
+                    Создать вакансию
+                </a>
+            </li>
+            <li class="nav-item hr">
+                <a class="nav-link" href="{% url 'vacancy_list' %}">
+                    <i class="fas fa-list"></i>
+                    Все вакансии
+                </a>
+            </li>
+        {% elif user.userprofile.role == 'university' %}
+            <li class="nav-item university">
+                <a class="nav-link" href="{% url 'create_internship' %}">
+                    <i class="fas fa-graduation-cap"></i>
+                    Создать стажировку
+                </a>
+            </li>
+            <li class="nav-item university">
+                <a class="nav-link" href="{% url 'vacancy_list' %}?type=internship">
+                    <i class="fas fa-list"></i>
+                    Все стажировки
+                </a>
+            </li>
+        {% elif user.userprofile.role == 'student' %}
+            <li class="nav-item student">
+                <a class="nav-link" href="{% url 'dashboard' %}">
+                    <i class="fas fa-file-alt"></i>
+                    Мои отклики
+                </a>
+            </li>
+            <li class="nav-item student">
+                <a class="nav-link" href="{% url 'dashboard' %}">
+                    <i class="fas fa-user-circle"></i>
+                    Моё резюме
+                </a>
+            </li>
+        {% endif %}
+            <li class="nav-item admin">
+                <a class="nav-link" href="{% url 'chat_list' %}">
+                    <i class="fas fa-shield-alt"></i>
+                    Чаты
+                </a>
+            </li>
+    {% endif %}
+</ul>
+
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="user-dropdown dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <div class="user-avatar">
+                                    {{ user.username|first|upper }}
+                                </div>
+                                <span class="d-none d-md-inline">
+                                    {{ user.username }}
+                                    <span class="role-badge">
+                                        {% if user.userprofile.role == 'admin' %}Админ
+                                        {% elif user.userprofile.role == 'hr' %}HR
+                                        {% elif user.userprofile.role == 'university' %}ВУЗ
+                                        {% elif user.userprofile.role == 'student' %}Студент
+                                        {% else %}Пользователь{% endif %}
+                                    </span>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+    <li>
+        <a class="dropdown-item" href="{% url 'dashboard' %}">
+            <i class="fas fa-tachometer-alt"></i>
+            Личный кабинет
+        </a>
+    </li>
+    <li>
+        <a class="dropdown-item" href="{% url 'dashboard' %}">
+            <i class="fas fa-user-cog"></i>
+            Настройки профиля
+        </a>
+    </li>
+    <li>
+        <a class="dropdown-item" href="#">
+            <i class="fas fa-bell"></i>
+            Уведомления
+        </a>
+    </li>
+    <li><hr class="dropdown-divider"></li>
+    <li>
+        <a class="dropdown-item text-danger" href="{% url 'logout' %}">
+            <i class="fas fa-sign-out-alt"></i>
+            Выйти
+        </a>
+    </li>
+</ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'role_selection' %}">
+                                <i class="fas fa-sign-in-alt"></i>
+                                Войти
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-success" href="{% url 'register' %}#top" style="
+                                border: 2px solid var(--primary-green);
+                                color: var(--primary-green);
+                                padding: 0.5rem 1.5rem !important;
+                                margin-left: 0.5rem;
+                            ">
+                                <i class="fas fa-user-plus"></i>
+                                Регистрация
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Add padding to account for fixed navbar -->
+    <div style="padding-top: 80px;"></div>
+
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="footer mt-5" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white; padding: 4rem 0 2rem; position: relative;">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4 mb-4">
+                <div class="footer-brand">
+                    <h3 style="color: white; margin-bottom: 1.5rem; font-weight: 700;">
+                        TechTalent<span style="color: #4caf50;">Hub</span>
+                    </h3>
+                    <p style="color: #ccc; line-height: 1.6; margin-bottom: 1.5rem;">
+                        Карьерная платформа ОЭЗ «Технополис Москва».<br>
+                        Соединяем талантливых специалистов с ведущими технологическими компаниями.
+                    </p>
+                    <div class="social-links" style="display: flex; gap: 1rem;">
+                        <a href="#" class="social-link" style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s ease;">
+                            <i class="fab fa-vk"></i>
+                        </a>
+                        <a href="#" class="social-link" style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s ease;">
+                            <i class="fab fa-telegram"></i>
+                        </a>
+                        <a href="#" class="social-link" style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s ease;">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="social-link" style="width: 40px; height: 40px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s ease;">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-2 col-md-3 mb-4">
+                <h5 style="color: white; margin-bottom: 1.5rem; font-weight: 600; font-size: 1.1rem;">Платформа</h5>
+                <ul class="footer-links" style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;"><a href="{% url 'vacancy_list' %}" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Вакансии</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{% url 'vacancy_list' %}?type=internship" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Стажировки</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{% url 'register' %}" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Регистрация</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="{% url 'role_selection' %}" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Вход</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 mb-4">
+                <h5 style="color: white; margin-bottom: 1.5rem; font-weight: 600; font-size: 1.1rem;">Компаниям</h5>
+                <ul class="footer-links" style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;"><a href="{% url 'create_vacancy' %}" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Разместить вакансию</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">О платформе</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Тарифы</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Контакты</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 mb-4">
+                <h5 style="color: white; margin-bottom: 1.5rem; font-weight: 600; font-size: 1.1rem;">Соискателям</h5>
+                <ul class="footer-links" style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Создать резюме</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Карьерный совет</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">Блог</a></li>
+                    <li style="margin-bottom: 0.5rem;"><a href="#" style="color: #ccc; text-decoration: none; transition: color 0.3s ease;">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div class="col-lg-2 col-md-3 mb-4">
+                <h5 style="color: white; margin-bottom: 1.5rem; font-weight: 600; font-size: 1.1rem;">Контакты</h5>
+                <div class="contact-info">
+                    <p style="color: #ccc; margin-bottom: 1rem; display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <i class="fas fa-map-marker-alt" style="margin-top: 0.2rem; min-width: 16px;"></i>
+                        <span>Москва, ОЭЗ «Технополис»</span>
+                    </p>
+                    <p style="color: #ccc; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-phone" style="min-width: 16px;"></i>
+                        <span>+7 (495) 123-45-67</span>
+                    </p>
+                    <p style="color: #ccc; margin-bottom: 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-envelope" style="min-width: 16px;"></i>
+                        <span>info@techtalenthub.ru</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom" style="border-top: 1px solid #444; padding-top: 2rem; margin-top: 2rem;">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p style="color: #999; margin: 0; font-size: 0.9rem;">
+                        &copy; 2025 TechTalentHub. Все права защищены.
+                    </p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="footer-legal">
+                        <a href="{% url 'privacy_policy' %}" style="color: #999; text-decoration: none; margin-left: 1.5rem; font-size: 0.9rem; transition: color 0.3s ease;">Политика конфиденциальности</a>
+                        <a href="{% url 'terms_of_use' %}" style="color: #999; text-decoration: none; margin-left: 1.5rem; font-size: 0.9rem; transition: color 0.3s ease;">Условия использования</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Декоративные элементы -->
+    <div class="footer-bg-elements">
+        <div class="bg-element" style="position: absolute; top: 10%; left: 5%; width: 100px; height: 100px; background: rgba(76, 175, 80, 0.1); border-radius: 50%;"></div>
+        <div class="bg-element" style="position: absolute; bottom: 20%; right: 10%; width: 150px; height: 150px; background: rgba(76, 175, 80, 0.05); border-radius: 50%;"></div>
+    </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+          // Добавляем интерактивность для футера
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация при наведении на социальные иконки
+        const socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.1)';
+            });
+
+            link.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Плавное появление футера при скролле
+        const footer = document.querySelector('.footer');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    footer.style.opacity = '1';
+                    footer.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        footer.style.opacity = '0';
+        footer.style.transform = 'translateY(20px)';
+        footer.style.transition = 'all 0.6s ease-out';
+
+        observer.observe(footer);
+    });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Active link highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
