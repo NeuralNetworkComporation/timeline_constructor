@@ -965,7 +965,7 @@ function loadConnections() {
     {% for connection in connections %}
     addConnectionToBoard({
         id: {{ connection.id }},
-        source: {{ connection.from_node.id }},
+        source: {{ connection.source.id }},
         target: {{ connection.to_node.id }},
         color: '{{ connection.color }}'
     });

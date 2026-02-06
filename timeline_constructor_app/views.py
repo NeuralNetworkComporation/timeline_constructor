@@ -890,7 +890,7 @@ def board(request):
     nodes = BoardNode.objects.filter(user=request.user)
 
     # Получаем все соединения
-    connections = BoardConnection.objects.filter(from_node__user=request.user)
+    connections = BoardConnection.objects.filter(source__created_by=request.user)
 
     return render(request, 'board/simple_board.html', {
         'nodes': nodes,
