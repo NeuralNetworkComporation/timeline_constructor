@@ -39,7 +39,6 @@ urlpatterns = [
     path('timeline/<int:pk>/export/download/', views.timeline_export_download, name='timeline_export_download'),
 
     # Board URLs
-    path('board/', views.board, name='board'),
     path('board/node/create/', views.create_board_node, name='create_board_node'),
     path('board/node/<int:node_id>/update/', views.update_board_node, name='update_board_node'),
     path('board/node/<int:node_id>/delete/', views.delete_board_node, name='delete_board_node'),
