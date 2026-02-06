@@ -1,0 +1,210 @@
+<g id="node-{{ timeline.id }}" class="timeline-node"
+   transform="translate({{ timeline.board_x|default:0 }}, {{ timeline.board_y|default:0 }})"
+   data-x="{{ timeline.board_x|default:0 }}"
+   data-y="{{ timeline.board_y|default:0 }}">
+
+    <!-- Основной прямоугольник -->
+    <rect class="node-body" width="220" height="140" />
+
+    <!-- Заголовок -->
+    <rect class="node-header" width="220" height="40" />
+
+    <!-- Иконка таймлайна -->
+    <circle cx="30" cy="20" r="12" fill="white" />
+    <text x="30" y="25" text-anchor="middle" font-size="14" fill="{{ timeline.color_scheme|default:'#10b981' }}"
+          font-weight="600">T</text>
+
+    <!-- Название таймлайна -->
+    <text class="node-title-text" x="55" y="25" font-size="13" fill="white" font-weight="600">
+        {{ timeline.title|truncatechars:20 }}
+    </text>
+
+    <!-- Количество событий -->
+    <g transform="translate(180, 20)">
+        <circle r="10" fill="rgba(255,255,255,0.2)" />
+        <text class="node-event-count" x="0" y="5" text-anchor="middle">
+            {{ timeline.events.count }}
+        </text>
+    </g>
+
+    <!-- Контент -->
+    <text x="20" y="70" font-size="12" fill="#1f2937" font-weight="500">
+        Событий: {{ timeline.events.count }}
+    </text>
+
+    <text x="20" y="90" font-size="11" fill="#6b7280">
+        Создан: {{ timeline.created_at|date:"d.m.Y" }}
+    </text>
+
+    <text x="20" y="110" font-size="11" fill="#6b7280">
+        {% if timeline.is_public %}
+            <tspan fill="#10b981">●</tspan> Публичный
+        {% else %}
+            <tspan fill="#ef4444">●</tspan> Приватный
+        {% endif %}
+    </text>
+
+    <!-- Быстрые действия -->
+    <g class="node-actions" transform="translate(150, 100)">
+        <circle cx="0" cy="0" r="8" fill="#f3f4f6" />
+        <text x="0" y="4" text-anchor="middle" font-size="10">⋯</text>
+        <title>Быстрые действия</title>
+    </g>
+
+    <!-- Индикатор связей -->
+    {% if timeline.children.count > 0 %}
+    <g transform="translate(10, 125)">
+        <circle r="6" fill="#3b82f6" />
+        <text x="10" y="4" font-size="10" fill="#3b82f6">
+            +{{ timeline.children.count }}
+        </text>
+    </g>
+    {% endif %}
+
+    <!-- Точки для перетаскивания размера (опционально) -->
+    <circle cx="220" cy="140" r="6" fill="#e5e7eb" style="cursor: nwse-resize;" />
+</g>
+
+<script>
+    // Инициализация конкретного узла
+    document.addEventListener('DOMContentLoaded', function() {
+        const node = document.getElementById('node-{{ timeline.id }}');
+
+        // Добавляем обработчики для быстрых действий
+        const actionsCircle = node.querySelector('g[transform="translate(150, 100)"]');
+        if (actionsCircle) {
+            actionsCircle.addEventListener('click', function(e) {
+                e.stopPropagation();
+                showQuickActionsMenu('{{ timeline.id }}', e.clientX, e.clientY);
+            });
+        }
+
+        // Добавляем в глобальное состояние
+        window.boardState.nodes['{{ timeline.id }}'] = node;
+    });
+
+    function showQuickActionsMenu(timelineId, x, y) {
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = x + 'px';
+        menu.style.top = y + 'px';
+        menu.style.zIndex = '1001';
+
+        menu.innerHTML = `
+            <div class="context-menu-item" onclick="viewTimeline(${timelineId})">
+                <i class="fas fa-eye text-primary"></i>
+                <span>Просмотреть</span>
+            </div>
+            <div class="context-menu-item" onclick="editTimeline(${timelineId})">
+                <i class="fas fa-edit text-warning"></i>
+                <span>Редактировать</span>
+            </div>
+            <div class="context-menu-item" onclick="duplicateTimeline(${timelineId})">
+                <i class="fas fa-copy text-info"></i>
+                <span>Дублировать</span>
+            </div>
+            <hr>
+            <div class="context-menu-item" onclick="createChildTimeline(${timelineId})">
+                <i class="fas fa-plus-circle text-success"></i>
+                <span>Создать дочерний</span>
+            </div>
+            <div class="context-menu-item" onclick="showConnections(${timelineId})">
+                <i class="fas fa-link text-primary"></i>
+                <span>Показать связи</span>
+            </div>
+        `;
+
+        document.body.appendChild(menu);
+
+        // Закрытие при клике вне меню
+        setTimeout(() => {
+            document.addEventListener('click', function closeMenu(e) {
+                if (!menu.contains(e.target)) {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }, 100);
+    }
+
+    function viewTimeline(id) {
+        window.open(`/timeline/${id}/`, '_blank');
+    }
+
+    function editTimeline(id) {
+        window.location.href = `/timeline/${id}/edit/`;
+    }
+
+    function duplicateTimeline(id) {
+        fetch(`/timeline/${id}/duplicate/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Таймлайн продублирован', 'success');
+                setTimeout(() => location.reload(), 500);
+            }
+        });
+    }
+
+    function createChildTimeline(parentId) {
+        // Позиция рядом с родительским узлом
+        const parentNode = document.getElementById(`node-${parentId}`);
+        if (parentNode) {
+            const x = parseFloat(parentNode.getAttribute('data-x')) || 0;
+            const y = parseFloat(parentNode.getAttribute('data-y')) || 0;
+
+            createConnectedTimelineAt(x + 250, y);
+        }
+    }
+
+    function showConnections(timelineId) {
+        // Подсвечиваем все связи этого узла
+        const connections = window.boardState.connections.filter(
+            conn => conn.source === timelineId.toString() || conn.target === timelineId.toString()
+        );
+
+        // Сбрасываем все подсветки
+        document.querySelectorAll('.connection-line').forEach(line => {
+            line.style.stroke = '#3b82f6';
+            line.style.strokeWidth = '2';
+        });
+
+        // Подсвечиваем найденные связи
+        connections.forEach(conn => {
+            conn.element.style.stroke = '#10b981';
+            conn.element.style.strokeWidth = '3';
+        });
+
+        // Также подсвечиваем связанные узлы
+        document.querySelectorAll('.timeline-node').forEach(node => {
+            node.style.filter = 'none';
+        });
+
+        const connectedIds = connections.flatMap(conn => [conn.source, conn.target]);
+        connectedIds.forEach(id => {
+            const node = document.getElementById(`node-${id}`);
+            if (node) {
+                node.style.filter = 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.5))';
+            }
+        });
+
+        showToast(`Показано ${connections.length} связей`, 'info');
+
+        // Через 3 секунды сбрасываем подсветку
+        setTimeout(() => {
+            document.querySelectorAll('.connection-line').forEach(line => {
+                line.style.stroke = '#3b82f6';
+                line.style.strokeWidth = '2';
+            });
+
+            document.querySelectorAll('.timeline-node').forEach(node => {
+                node.style.filter = '';
+            });
+        }, 3000);
+    }
+</script>

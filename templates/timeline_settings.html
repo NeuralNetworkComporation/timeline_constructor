@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 fade-in">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold gradient-text">Настройки таймлайна</h2>
+                    <p class="text-muted">{{ timeline.title }}</p>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Ошибки в форме:</strong>
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <div class="row g-3">
+                        <!-- Цветовая схема -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Цветовая схема</label>
+                            <select name="color_scheme" class="form-select">
+                                <option value="green" {% if form.color_scheme.value == 'green' %}selected{% endif %}>🟢 Зеленая</option>
+                                <option value="blue" {% if form.color_scheme.value == 'blue' %}selected{% endif %}>🔵 Синяя</option>
+                                <option value="purple" {% if form.color_scheme.value == 'purple' %}selected{% endif %}>🟣 Фиолетовая</option>
+                                <option value="orange" {% if form.color_scheme.value == 'orange' %}selected{% endif %}>🟠 Оранжевая</option>
+                                <option value="red" {% if form.color_scheme.value == 'red' %}selected{% endif %}>🔴 Красная</option>
+                                <option value="teal" {% if form.color_scheme.value == 'teal' %}selected{% endif %}>🩵 Бирюзовая</option>
+                            </select>
+                            {% if form.color_scheme.errors %}
+                                <div class="text-danger small mt-1">{{ form.color_scheme.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Макет -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Макет отображения</label>
+                            <select name="layout" class="form-select">
+                                <option value="vertical" {% if form.layout.value == 'vertical' %}selected{% endif %}>📏 Вертикальный</option>
+                                <option value="horizontal" {% if form.layout.value == 'horizontal' %}selected{% endif %}>↔️ Горизонтальный</option>
+                                <option value="centered" {% if form.layout.value == 'centered' %}selected{% endif %}>🎯 Центрированный</option>
+                            </select>
+                            {% if form.layout.errors %}
+                                <div class="text-danger small mt-1">{{ form.layout.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Настройки отображения -->
+                        <div class="col-12">
+                            <h5 class="fw-semibold mt-4 mb-3">Настройки отображения</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="show_dates" id="show_dates"
+                                               {% if form.show_dates.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="show_dates">
+                                            📅 Показывать даты
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="show_images" id="show_images"
+                                               {% if form.show_images.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="show_images">
+                                            🖼️ Показывать изображения
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="allow_comments" id="allow_comments"
+                                               {% if form.allow_comments.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="allow_comments">
+                                            💬 Разрешить комментарии
+                                        </label>
+                                    </div>
+
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="is_public" id="is_public"
+                                               {% if form.is_public.value %}checked{% endif %}>
+                                        <label class="form-check-label fw-semibold" for="is_public">
+                                            🌐 Публичный доступ
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Действия -->
+                        <div class="col-12 mt-4">
+                            <div class="d-flex gap-3 justify-content-end">
+                                <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Назад к редактированию
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Сохранить настройки
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Дополнительные действия -->
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="fw-semibold mb-3">Дополнительные действия</h5>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <a href="{% url 'timeline_export' timeline.pk %}"
+   class="btn btn-outline-primary w-100"
+   download="{{ timeline.title|slugify }}.json">
+    <i class="fas fa-download me-2"></i>Экспорт в JSON
+</a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'timeline_duplicate' timeline.pk %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-copy me-2"></i>Создать копию
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'timeline_delete' timeline.pk %}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash me-2"></i>Удалить таймлайн
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Статистика -->
+                <div class="mt-4 pt-4 border-top">
+                    <h5 class="fw-semibold mb-3">Статистика таймлайна</h5>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="h4 text-primary mb-0">{{ timeline.events.count }}</div>
+                            <small class="text-muted">Событий</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 text-success mb-0">{{ timeline.views.count }}</div>
+                            <small class="text-muted">Просмотров</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="h4 text-warning mb-0">{{ timeline.likes.count }}</div>
+                            <small class="text-muted">Лайков</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

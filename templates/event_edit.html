@@ -1,73 +1,150 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8 fade-in">
-            <div class="glass-card p-5">
-                <div class="text-center mb-5">
-                    <i class="fas fa-edit display-1 gradient-text mb-3"></i>
-                    <h1 class="fw-bold gradient-text">Редактирование события</h1>
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold gradient-text">Редактирование события</h2>
                     <p class="text-muted">Таймлайн: {{ timeline.title }}</p>
                 </div>
 
-                <form method="post" enctype="multipart/form-data">
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    <strong>Ошибки в форме:</strong>
+                    <ul>
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ field }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" novalidate>
                     {% csrf_token %}
-                    
-                    <div class="row g-4">
+
+                    <div class="row g-3">
+                        <!-- Основная информация -->
                         <div class="col-12">
                             <label class="form-label fw-semibold">Название события *</label>
-                            {{ form.title }}
+                            <input type="text" name="title" class="form-control" required
+                                   value="{{ form.title.value|default:event.title }}">
                         </div>
-                        
+
                         <div class="col-12">
-                            <label class="form-label fw-semibold">Описание *</label>
-                            {{ form.description }}
+                            <label class="form-label fw-semibold">Краткое описание *</label>
+                            <textarea name="description" class="form-control" rows="3" required>{{ form.description.value|default:event.description }}</textarea>
                         </div>
-                        
-                        <div class="col-md-6">
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Подробное описание</label>
+                            <textarea name="detailed_description" class="form-control" rows="5">{{ form.detailed_description.value|default:event.detailed_description }}</textarea>
+                        </div>
+
+                        <!-- Даты -->
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">Год *</label>
-                            {{ form.year }}
+                            <input type="number" name="year" class="form-control" required
+                                   min="-3000" max="2100" value="{{ form.year.value|default:event.year }}">
                         </div>
-                        
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Месяц</label>
+                            <input type="number" name="month" class="form-control"
+                                   min="1" max="12" value="{{ form.month.value|default:event.month }}" placeholder="1-12">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">День</label>
+                            <input type="number" name="day" class="form-control"
+                                   min="1" max="31" value="{{ form.day.value|default:event.day }}" placeholder="1-31">
+                        </div>
+
+                        <!-- Классификация -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Эпоха *</label>
-                            {{ form.era }}
+                            <select name="era" class="form-select" required>
+                                <option value="ancient" {% if form.era.value == 'ancient' or event.era == 'ancient' %}selected{% endif %}>🏛️ Древняя математика</option>
+                                <option value="medieval" {% if form.era.value == 'medieval' or event.era == 'medieval' %}selected{% endif %}>⛪ Средневековая математика</option>
+                                <option value="renaissance" {% if form.era.value == 'renaissance' or event.era == 'renaissance' %}selected{% endif %}>🎨 Эпоха Возрождения</option>
+                                <option value="enlightenment" {% if form.era.value == 'enlightenment' or event.era == 'enlightenment' %}selected{% endif %}>💡 Эпоха Просвещения</option>
+                                <option value="modern" {% if form.era.value == 'modern' or event.era == 'modern' %}selected{% endif %}>🔬 Современная математика</option>
+                                <option value="contemporary" {% if form.era.value == 'contemporary' or event.era == 'contemporary' %}selected{% endif %}>💻 Современность</option>
+                            </select>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Тип события</label>
-                            {{ form.event_type }}
+                            <select name="event_type" class="form-select">
+                                <option value="discovery" {% if form.event_type.value == 'discovery' or event.event_type == 'discovery' %}selected{% endif %}>🔍 Открытие</option>
+                                <option value="invention" {% if form.event_type.value == 'invention' or event.event_type == 'invention' %}selected{% endif %}>⚡ Изобретение</option>
+                                <option value="publication" {% if form.event_type.value == 'publication' or event.event_type == 'publication' %}selected{% endif %}>📚 Публикация</option>
+                                <option value="theory" {% if form.event_type.value == 'theory' or event.event_type == 'theory' %}selected{% endif %}>🧠 Теория</option>
+                                <option value="method" {% if form.event_type.value == 'method' or event.event_type == 'method' %}selected{% endif %}>🛠️ Метод</option>
+                                <option value="award" {% if form.event_type.value == 'award' or event.event_type == 'award' %}selected{% endif %}>🏆 Награда</option>
+                                <option value="event" {% if form.event_type.value == 'event' or event.event_type == 'event' %}selected{% endif %}>📅 Событие</option>
+                            </select>
                         </div>
-                        
+
+                        <!-- Дополнительная информация -->
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Важность</label>
-                            {{ form.importance }}
+                            <select name="importance" class="form-select">
+                                <option value="1" {% if form.importance.value == '1' or event.importance == 1 %}selected{% endif %}>⭐ Низкая</option>
+                                <option value="2" {% if form.importance.value == '2' or event.importance == 2 %}selected{% endif %}>⭐⭐ Средняя</option>
+                                <option value="3" {% if form.importance.value == '3' or event.importance == 3 %}selected{% endif %}>⭐⭐⭐ Высокая</option>
+                            </select>
                         </div>
-                        
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Местоположение</label>
+                            <input type="text" name="location" class="form-control"
+                                   value="{{ form.location.value|default:event.location }}" placeholder="Город, страна">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Теги</label>
+                            <input type="text" name="tags" class="form-control"
+                                   value="{{ form.tags.value|default:event.tags }}" placeholder="математика, открытие, теория...">
+                            <div class="form-text">Укажите теги через запятую</div>
+                        </div>
+
                         <div class="col-12">
                             <label class="form-label fw-semibold">Ссылка на источник</label>
-                            {{ form.source_link }}
+                            <input type="url" name="source_link" class="form-control"
+                                   value="{{ form.source_link.value|default:event.source_link }}" placeholder="https://example.com">
                         </div>
-                        
+
+                        <!-- Изображение -->
                         <div class="col-12">
                             <label class="form-label fw-semibold">Изображение</label>
-                            {{ form.image }}
+                            <input type="file" name="image" class="form-control" accept="image/*">
                             {% if event.image %}
-                            <div class="mt-2">
+                            <div class="mt-3">
                                 <small class="text-muted">Текущее изображение:</small>
-                                <img src="{{ event.image.url }}" alt="{{ event.title }}" class="img-thumbnail ms-2" style="max-height: 50px;">
+                                <div class="d-flex align-items-center mt-2">
+                                    <img src="{{ event.image.url }}" alt="{{ event.title }}" class="img-thumbnail me-3" style="max-height: 100px;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="image-clear" id="image-clear">
+                                        <label class="form-check-label text-danger" for="image-clear">
+                                            Удалить изображение
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
                             {% endif %}
                         </div>
-                        
+
+                        <!-- Действия -->
                         <div class="col-12 mt-4">
                             <div class="d-flex gap-3 justify-content-end">
-                                <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-outline-secondary">
                                     <i class="fas fa-arrow-left me-2"></i>Отмена
                                 </a>
-                                <button type="submit" class="btn btn-primary btn-lg">
+                                <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-save me-2"></i>Сохранить изменения
                                 </button>
                             </div>

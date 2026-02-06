@@ -11,42 +11,80 @@
                     <p class="text-muted">Присоединяйтесь к сообществу MathTimeline</p>
                 </div>
 
-                <form method="post" novalidate>
+                {% if form.errors %}
+                <div class="alert alert-danger glass-card mb-4">
+                    <h6 class="fw-bold mb-2">Ошибки в форме:</h6>
+                    <ul class="mb-0">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <form method="post" novalidate id="signupForm">
                     {% csrf_token %}
 
                     <div class="row g-3">
                         <div class="col-12">
                             <label for="username" class="form-label fw-semibold">Имя пользователя *</label>
                             <input type="text" name="username" class="form-control" id="username" required
-                                   placeholder="Придумайте уникальное имя">
+                                   placeholder="Придумайте уникальное имя"
+                                   value="{{ form.username.value|default:'' }}">
                             <div class="form-text">Только буквы, цифры и @/./+/-/_</div>
                         </div>
 
                         <div class="col-12">
+                            <label for="email" class="form-label fw-semibold">Email (необязательно)</label>
+                            <input type="email" name="email" class="form-control" id="email"
+                                   placeholder="example@mail.com"
+                                   value="{{ form.email.value|default:'' }}">
+                        </div>
+
+                        <div class="col-12">
                             <label for="password1" class="form-label fw-semibold">Пароль *</label>
-                            <input type="password" name="password1" class="form-control" id="password1" required
-                                   placeholder="Не менее 8 символов">
+                            <div class="input-group">
+                                <input type="password" name="password1" class="form-control" id="password1" required
+                                       placeholder="Не менее 8 символов">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="password-strength mt-2">
+                                <div class="progress" style="height: 4px;">
+                                    <div class="progress-bar" id="passwordStrength"></div>
+                                </div>
+                                <small class="text-muted" id="strengthText">Начните ввод пароля</small>
+                            </div>
                         </div>
 
                         <div class="col-12">
                             <label for="password2" class="form-label fw-semibold">Подтверждение пароля *</label>
-                            <input type="password" name="password2" class="form-control" id="password2" required
-                                   placeholder="Повторите пароль">
+                            <div class="input-group">
+                                <input type="password" name="password2" class="form-control" id="password2" required
+                                       placeholder="Повторите пароль">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div class="form-text" id="passwordMatch"></div>
                         </div>
 
                         <div class="col-12">
                             <div class="glass-card p-3 bg-light">
                                 <h6 class="fw-semibold mb-2">Требования к паролю:</h6>
-                                <ul class="list-unstyled small text-muted mb-0">
-                                    <li><i class="fas fa-check text-success me-1"></i> Не менее 8 символов</li>
-                                    <li><i class="fas fa-check text-success me-1"></i> Не только цифры</li>
-                                    <li><i class="fas fa-check text-success me-1"></i> Не слишком простой</li>
+                                <ul class="list-unstyled small text-muted mb-0" id="passwordRules">
+                                    <li><i class="fas fa-check text-success me-1" id="ruleLength"></i> Не менее 8 символов</li>
+                                    <li><i class="fas fa-check text-success me-1" id="ruleNumbers"></i> Содержит цифры</li>
+                                    <li><i class="fas fa-check text-success me-1" id="ruleLetters"></i> Содержит буквы</li>
                                 </ul>
                             </div>
                         </div>
 
                         <div class="col-12 mt-4">
-                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <button type="submit" class="btn btn-primary w-100 btn-lg" id="submitBtn">
                                 <i class="fas fa-user-plus me-2"></i>Создать аккаунт
                             </button>
                         </div>
@@ -60,9 +98,163 @@
                             Войдите здесь
                         </a>
                     </p>
+                    <hr class="my-4">
+                    <small class="text-muted">
+                        Регистрируясь, вы соглашаетесь с
+                        <a href="#" class="text-decoration-none">Условиями использования</a> и
+                        <a href="#" class="text-decoration-none">Политикой конфиденциальности</a>
+                    </small>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .password-strength .progress {
+        background: #e5e7eb;
+        border-radius: 2px;
+    }
+
+    .password-strength .progress-bar {
+        border-radius: 2px;
+        transition: width 0.3s ease;
+    }
+
+    .password-rules li {
+        transition: all 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const password1 = document.getElementById('password1');
+        const password2 = document.getElementById('password2');
+        const toggle1 = document.getElementById('togglePassword1');
+        const toggle2 = document.getElementById('togglePassword2');
+        const strengthBar = document.getElementById('passwordStrength');
+        const strengthText = document.getElementById('strengthText');
+        const passwordMatch = document.getElementById('passwordMatch');
+        const submitBtn = document.getElementById('submitBtn');
+        const signupForm = document.getElementById('signupForm');
+
+        // Показать/скрыть пароль
+        [toggle1, toggle2].forEach((btn, index) => {
+            btn.addEventListener('click', function() {
+                const passwordField = index === 0 ? password1 : password2;
+                const icon = this.querySelector('i');
+
+                if (passwordField.type === 'password') {
+                    passwordField.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordField.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+        });
+
+        // Проверка сложности пароля
+        password1.addEventListener('input', function() {
+            const password = this.value;
+            let strength = 0;
+            let text = '';
+            let color = '';
+
+            // Проверяем правила
+            const hasLength = password.length >= 8;
+            const hasNumbers = /\d/.test(password);
+            const hasLetters = /[a-zA-Z]/.test(password);
+
+            // Обновляем иконки правил
+            document.getElementById('ruleLength').className =
+                hasLength ? 'fas fa-check text-success me-1' : 'fas fa-times text-danger me-1';
+            document.getElementById('ruleNumbers').className =
+                hasNumbers ? 'fas fa-check text-success me-1' : 'fas fa-times text-danger me-1';
+            document.getElementById('ruleLetters').className =
+                hasLetters ? 'fas fa-check text-success me-1' : 'fas fa-times text-danger me-1';
+
+            // Оцениваем сложность
+            if (hasLength) strength += 33;
+            if (hasNumbers) strength += 33;
+            if (hasLetters) strength += 34;
+
+            // Дополнительные проверки
+            if (password.length >= 12) strength += 20;
+            if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) strength += 20;
+            if (/[A-Z]/.test(password) && /[a-z]/.test(password)) strength += 20;
+
+            strength = Math.min(strength, 100);
+
+            // Определяем текст и цвет
+            if (strength < 40) {
+                text = 'Слабый пароль';
+                color = '#ef4444';
+            } else if (strength < 70) {
+                text = 'Средний пароль';
+                color = '#f59e0b';
+            } else {
+                text = 'Надежный пароль';
+                color = '#10b981';
+            }
+
+            // Обновляем отображение
+            strengthBar.style.width = strength + '%';
+            strengthBar.style.backgroundColor = color;
+            strengthText.textContent = text;
+            strengthText.style.color = color;
+
+            // Проверяем совпадение паролей
+            checkPasswordMatch();
+        });
+
+        // Проверка совпадения паролей
+        function checkPasswordMatch() {
+            if (password1.value && password2.value) {
+                if (password1.value === password2.value) {
+                    passwordMatch.innerHTML = '<i class="fas fa-check text-success me-1"></i>Пароли совпадают';
+                    passwordMatch.className = 'form-text text-success';
+                    return true;
+                } else {
+                    passwordMatch.innerHTML = '<i class="fas fa-times text-danger me-1"></i>Пароли не совпадают';
+                    passwordMatch.className = 'form-text text-danger';
+                    return false;
+                }
+            }
+            return null;
+        }
+
+        password2.addEventListener('input', checkPasswordMatch);
+
+        // Валидация формы
+        signupForm.addEventListener('submit', function(e) {
+            const match = checkPasswordMatch();
+
+            if (match === false) {
+                e.preventDefault();
+                alert('Пароли не совпадают. Пожалуйста, проверьте ввод.');
+                password2.focus();
+                return;
+            }
+
+            if (password1.value.length < 8) {
+                e.preventDefault();
+                alert('Пароль должен содержать не менее 8 символов');
+                password1.focus();
+                return;
+            }
+
+            // Показать индикатор загрузки
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Создаем аккаунт...';
+            submitBtn.disabled = true;
+        });
+
+        // Фокус на первое поле
+        document.getElementById('username').focus();
+    });
+</script>
 {% endblock %}

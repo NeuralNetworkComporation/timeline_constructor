@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if not user.is_authenticated %}
+<!-- Блок для неавторизованных пользователей -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="glass-card p-5 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-lock display-1 gradient-text mb-3"></i>
+                    <h2 class="fw-bold gradient-text mb-3">Требуется вход</h2>
+                    <p class="text-muted mb-4">Для импорта таймлайнов необходимо войти в систему</p>
+
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'login' %}?next={% url 'timeline_import' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Войти в аккаунт
+                        </a>
+                        <a href="{% url 'signup' %}?next={% url 'timeline_import' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Зарегистрироваться
+                        </a>
+                    </div>
+
+                    <div class="mt-4">
+                        <small class="text-muted">
+                            После регистрации вы сможете импортировать таймлайны и создавать свои
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<!-- Оригинальный контент для авторизованных пользователей -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 fade-in">
+            <div class="glass-card p-4">
+                <div class="text-center mb-4">
+                    <i class="fas fa-file-import display-1 gradient-text mb-3"></i>
+                    <h2 class="fw-bold gradient-text">Импорт таймлайна</h2>
+                    <p class="text-muted">Загрузите JSON файл для создания нового таймлайна</p>
+                </div>
+
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold mb-3">
+                                <i class="fas fa-info-circle text-primary me-2"></i>Как это работает
+                            </h5>
+                            <ul class="text-muted">
+                                <li class="mb-2">Экспортируйте таймлайн в формате JSON</li>
+                                <li class="mb-2">Измените данные в текстовом редакторе</li>
+                                <li class="mb-2">Загрузите файл для создания копии</li>
+                                <li>Все события будут импортированы</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100">
+                            <h5 class="fw-bold mb-3">
+                                <i class="fas fa-download text-success me-2"></i>Пример структуры
+                            </h5>
+                            <pre class="bg-light p-3 rounded small" style="max-height: 200px; overflow: auto;">{
+  "title": "История математики",
+  "description": "Важные открытия в математике",
+  "settings": {
+    "color_scheme": "green",
+    "layout": "vertical"
+  },
+  "events": [
+    {
+      "title": "Теорема Пифагора",
+      "description": "Открытие теоремы о соотношении сторон",
+      "year": -500,
+      "era": "ancient",
+      "event_type": "discovery"
+    }
+  ]
+}</pre>
+                            <a href="/static/sample_timeline.json" download class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="fas fa-download me-1"></i>Скачать пример
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card p-4">
+                    <form method="post" enctype="multipart/form-data" novalidate id="importForm">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">JSON файл *</label>
+                            <div class="file-upload-area">
+                                <input type="file" name="json_file" class="file-input" id="jsonFile" accept=".json" required>
+                                <label for="jsonFile" class="file-label">
+                                    <div class="text-center py-5">
+                                        <i class="fas fa-cloud-upload-alt display-4 text-muted mb-3"></i>
+                                        <h5 class="fw-bold mb-2">Выберите файл</h5>
+                                        <p class="text-muted mb-0">Перетащите или нажмите для выбора</p>
+                                        <small class="text-muted">Поддерживается только JSON формат</small>
+                                    </div>
+                                </label>
+                                <div class="file-name mt-2 text-center" id="fileName">Файл не выбран</div>
+                                {% if form.json_file.errors %}
+                                <div class="text-danger small mt-1">{{ form.json_file.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info glass-card border-info">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            После импорта таймлайн будет создан как <strong>приватный</strong>.
+                            Вы можете изменить настройки в редакторе.
+                        </div>
+
+                        <div class="d-flex gap-3 justify-content-end mt-4">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-file-import me-2"></i>Импортировать
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}  <!-- ВАЖНО: закрываем блок if здесь -->
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .file-upload-area {
+        position: relative;
+        border: 2px dashed var(--primary);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        background: var(--light);
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary-dark);
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .file-upload-area.dragover {
+        border-color: var(--primary-dark);
+        background: rgba(16, 185, 129, 0.1);
+        transform: scale(1.01);
+    }
+
+    .file-input {
+        position: absolute;
+        width: 0;
+        height: 0;
+        opacity: 0;
+    }
+
+    .file-label {
+        display: block;
+        cursor: pointer;
+        padding: 20px;
+    }
+
+    .file-name {
+        padding: 10px;
+        background: var(--light);
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .file-name.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--primary-dark);
+        border: 1px solid var(--primary-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('jsonFile');
+        const fileName = document.getElementById('fileName');
+        const fileArea = document.querySelector('.file-upload-area');
+        const importForm = document.getElementById('importForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Обработчик выбора файла
+        fileInput.addEventListener('change', function(e) {
+            if (this.files.length > 0) {
+                const file = this.files[0];
+                if (file.type === 'application/json' || file.name.endsWith('.json')) {
+                    fileName.textContent = `✓ ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                    fileName.classList.add('success');
+
+                    // Предпросмотр содержимого (опционально)
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        try {
+                            JSON.parse(e.target.result);
+                            console.log('Файл JSON валиден');
+                        } catch (err) {
+                            alert('Ошибка: файл не является валидным JSON');
+                            fileInput.value = '';
+                            fileName.textContent = 'Файл не выбран';
+                            fileName.classList.remove('success');
+                        }
+                    };
+                    reader.readAsText(file);
+                } else {
+                    alert('Пожалуйста, выберите файл в формате JSON');
+                    this.value = '';
+                    fileName.textContent = 'Файл не выбран';
+                    fileName.classList.remove('success');
+                }
+            } else {
+                fileName.textContent = 'Файл не выбран';
+                fileName.classList.remove('success');
+            }
+        });
+
+        // Drag and drop функциональность
+        fileArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        fileArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        fileArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change');
+                fileInput.dispatchEvent(event);
+            }
+        });
+
+        // Валидация перед отправкой
+        importForm.addEventListener('submit', function(e) {
+            if (!fileInput.files.length) {
+                e.preventDefault();
+                alert('Пожалуйста, выберите файл для импорта');
+                return;
+            }
+
+            // Показать индикатор загрузки
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Импортируем...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

@@ -3,69 +3,334 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-6 fade-in">
-            <div class="glass-card p-4">
-                <div class="text-center mb-4">
-                    <h2 class="fw-bold gradient-text">Создать новый таймлайн</h2>
-                    <p class="text-muted">Заполните основную информацию о вашем таймлайне</p>
+        <div class="col-lg-8 fade-in">
+            <!-- Заголовок с вариантами -->
+            <div class="text-center mb-5">
+                <h2 class="fw-bold gradient-text">Создать новый таймлайн</h2>
+                <p class="text-muted">Выберите способ создания</p>
+
+                <div class="btn-group btn-group-lg mt-3" role="group">
+                    <a href="#create-form" class="btn btn-primary active" data-bs-toggle="collapse" data-bs-target="#create-form">
+                        <i class="fas fa-plus me-2"></i>Создать с нуля
+                    </a>
+                    <a href="{% url 'timeline_import' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-file-import me-2"></i>Импортировать из файла
+                    </a>
                 </div>
+            </div>
 
-                <form method="post" novalidate>
-                    {% csrf_token %}
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Название таймлайна *</label>
-                        <input type="text" name="title" class="form-control" required
-                               value="{{ form.title.value|default:'' }}"
-                               placeholder="Например: История алгебры">
-                        {% if form.title.errors %}
-                            <div class="text-danger small mt-1">{{ form.title.errors }}</div>
-                        {% endif %}
+            <!-- Форма создания (изначально открыта) -->
+            <div class="collapse show" id="create-form">
+                <div class="glass-card p-4">
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold gradient-text">Новый таймлайн</h4>
+                        <p class="text-muted">Заполните основную информацию о вашем таймлайне</p>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Описание</label>
-                        <textarea name="description" class="form-control" rows="3"
-                                  placeholder="Опишите, о чем этот таймлайн...">{{ form.description.value|default:'' }}</textarea>
-                        {% if form.description.errors %}
-                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
-                        {% endif %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <strong>Ошибки в форме:</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                {% for error in errors %}
+                                    <li>{{ field }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
                     </div>
+                    {% endif %}
 
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Цветовая схема</label>
-                        <select name="color_scheme" class="form-select">
-                            <option value="green" selected>Зеленая</option>
-                            <option value="blue">Синяя</option>
-                            <option value="purple">Фиолетовая</option>
-                            <option value="orange">Оранжевая</option>
-                        </select>
-                    </div>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
 
-                    <div class="mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="is_public" id="is_public"
-                                   {% if form.is_public.value %}checked{% endif %}>
-                            <label class="form-check-label fw-semibold" for="is_public">
-                                Сделать таймлайн публичным
-                            </label>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Название таймлайна *</label>
+                            <input type="text" name="title" class="form-control" required
+                                   value="{{ form.title.value|default:'' }}"
+                                   placeholder="Например: История алгебры">
+                            {% if form.title.errors %}
+                                <div class="text-danger small mt-1">{{ form.title.errors }}</div>
+                            {% endif %}
                         </div>
-                        <div class="form-text">
-                            Публичные таймлайны видны всем пользователям
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Описание</label>
+                            <textarea name="description" class="form-control" rows="3"
+                                      placeholder="Опишите, о чем этот таймлайн...">{{ form.description.value|default:'' }}</textarea>
+                            {% if form.description.errors %}
+                                <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Цветовая схема -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Цветовая схема</label>
+                            <select name="color_scheme" class="form-select">
+                                <option value="green" {% if form.color_scheme.value == 'green' %}selected{% endif %}>Зеленая</option>
+                                <option value="blue" {% if form.color_scheme.value == 'blue' %}selected{% endif %}>Синяя</option>
+                                <option value="purple" {% if form.color_scheme.value == 'purple' %}selected{% endif %}>Фиолетовая</option>
+                                <option value="orange" {% if form.color_scheme.value == 'orange' %}selected{% endif %}>Оранжевая</option>
+                                <option value="red" {% if form.color_scheme.value == 'red' %}selected{% endif %}>Красная</option>
+                                <option value="teal" {% if form.color_scheme.value == 'teal' %}selected{% endif %}>Бирюзовая</option>
+                            </select>
+                            {% if form.color_scheme.errors %}
+                                <div class="text-danger small mt-1">{{ form.color_scheme.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Макет -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Макет отображения</label>
+                            <select name="layout" class="form-select">
+                                <option value="vertical" {% if form.layout.value == 'vertical' %}selected{% endif %}>Вертикальный</option>
+                                <option value="horizontal" {% if form.layout.value == 'horizontal' %}selected{% endif %}>Горизонтальный</option>
+                                <option value="centered" {% if form.layout.value == 'centered' %}selected{% endif %}>Центрированный</option>
+                            </select>
+                            {% if form.layout.errors %}
+                                <div class="text-danger small mt-1">{{ form.layout.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Настройки -->
+                        <div class="mb-4">
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="is_public" id="is_public"
+                                       {% if form.is_public.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="is_public">
+                                    Сделать таймлайн публичным
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="show_dates" id="show_dates"
+                                       {% if form.show_dates.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="show_dates">
+                                    Показывать даты
+                                </label>
+                            </div>
+
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" name="show_images" id="show_images"
+                                       {% if form.show_images.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="show_images">
+                                    Показывать изображения
+                                </label>
+                            </div>
+
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="allow_comments" id="allow_comments"
+                                       {% if form.allow_comments.value %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="allow_comments">
+                                    Разрешить комментарии
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary flex-fill">
+                                <i class="fas fa-arrow-left me-2"></i>Отмена
+                            </a>
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="fas fa-plus me-2"></i>Создать таймлайн
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Блок с быстрыми шаблонами -->
+            <div class="mt-5">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-bolt text-warning me-2"></i>Быстрый старт
+                    </h5>
+                    <p class="text-muted mb-3">Начните с готовых тем или импортируйте существующий таймлайн</p>
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="quick-template text-center p-3 border rounded">
+                                <div class="template-icon mb-2">
+                                    <i class="fas fa-landmark fa-2x text-primary"></i>
+                                </div>
+                                <h6 class="fw-bold">Древняя математика</h6>
+                                <small class="text-muted d-block mb-2">Египет, Греция, Рим</small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('ancient')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="quick-template text-center p-3 border rounded">
+                                <div class="template-icon mb-2">
+                                    <i class="fas fa-castle fa-2x text-info"></i>
+                                </div>
+                                <h6 class="fw-bold">Средневековье</h6>
+                                <small class="text-muted d-block mb-2">Арабская математика</small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('medieval')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="quick-template text-center p-3 border rounded">
+                                <div class="template-icon mb-2">
+                                    <i class="fas fa-flask fa-2x text-success"></i>
+                                </div>
+                                <h6 class="fw-bold">Современность</h6>
+                                <small class="text-muted d-block mb-2">XX-XXI век</small>
+                                <button class="btn btn-sm btn-outline-primary" onclick="useTemplate('modern')">
+                                    Использовать
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="d-flex gap-3">
-                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary flex-fill">
-                            <i class="fas fa-arrow-left me-2"></i>Отмена
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'timeline_import' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-file-import me-2"></i>Или импортируйте из JSON файла
                         </a>
-                        <button type="submit" class="btn btn-primary flex-fill">
-                            <i class="fas fa-plus me-2"></i>Создать таймлайн
-                        </button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .btn-group .btn {
+        transition: all 0.3s ease;
+    }
+
+    .btn-group .btn.active {
+        box-shadow: 0 0 0 2px var(--primary-light);
+    }
+
+    .quick-template {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .quick-template:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary) !important;
+        box-shadow: 0 5px 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .template-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(16, 185, 129, 0.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Переключение между кнопками "Создать" и "Импорт"
+    document.addEventListener('DOMContentLoaded', function() {
+        const createBtn = document.querySelector('[data-bs-target="#create-form"]');
+        const importBtn = document.querySelector('[href="{% url 'timeline_import' %}"]');
+
+        if (createBtn && importBtn) {
+            createBtn.addEventListener('click', function() {
+                this.classList.add('active');
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+
+                importBtn.classList.remove('active');
+                importBtn.classList.remove('btn-primary');
+                importBtn.classList.add('btn-outline-primary');
+            });
+
+            // При клике на импорт убираем активность с создания
+            importBtn.addEventListener('click', function(e) {
+                createBtn.classList.remove('active');
+                createBtn.classList.remove('btn-primary');
+                createBtn.classList.add('btn-outline-primary');
+
+                this.classList.add('active');
+                this.classList.remove('btn-outline-primary');
+                this.classList.add('btn-primary');
+            });
+        }
+
+        // Заполнение формы шаблоном
+        window.useTemplate = function(templateType) {
+            const templates = {
+                'ancient': {
+                    title: 'Древняя математика',
+                    description: 'Математика древних цивилизаций: Египет, Вавилон, Древняя Греция. Теорема Пифагора, геометрия Евклида, Архимед.',
+                    color_scheme: 'green',
+                    layout: 'vertical'
+                },
+                'medieval': {
+                    title: 'Средневековая математика',
+                    description: 'Развитие математики в средние века: арабские цифры, алгебра Аль-Хорезми, европейские университеты.',
+                    color_scheme: 'blue',
+                    layout: 'centered'
+                },
+                'modern': {
+                    title: 'Современная математика',
+                    description: 'Математика XX-XXI веков: теория множеств, теория вероятностей, компьютерные науки, искусственный интеллект.',
+                    color_scheme: 'purple',
+                    layout: 'horizontal'
+                }
+            };
+
+            const template = templates[templateType];
+
+            // Заполняем форму
+            document.querySelector('input[name="title"]').value = template.title;
+            document.querySelector('textarea[name="description"]').value = template.description;
+            document.querySelector('select[name="color_scheme"]').value = template.color_scheme;
+            document.querySelector('select[name="layout"]').value = template.layout;
+
+            // Показываем уведомление
+            showNotification(`Шаблон "${template.title}" загружен! Заполните остальные поля и нажмите "Создать таймлайн".`, 'success');
+
+            // Прокручиваем к форме
+            document.getElementById('create-form').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        function showNotification(message, type) {
+            // Создаем уведомление
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type} alert-dismissible fade show glass-card`;
+            alert.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ${message}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            // Вставляем перед формой
+            const form = document.querySelector('#create-form .glass-card');
+            if (form) {
+                form.parentNode.insertBefore(alert, form);
+
+                // Автоматически скрываем через 5 секунд
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.classList.remove('show');
+                        setTimeout(() => {
+                            if (alert.parentNode) {
+                                alert.parentNode.removeChild(alert);
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            }
+        }
+    });
+</script>
 {% endblock %}

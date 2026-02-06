@@ -1,0 +1,385 @@
+<div id="contextMenu" class="context-menu">
+    <div class="context-menu-item" onclick="createTimelineHere()">
+        <i class="fas fa-plus-circle text-success"></i>
+        <span>Создать новый таймлайн</span>
+    </div>
+
+    <div class="context-menu-item" onclick="createConnectedTimeline()" id="connectMenuItem" style="display: none;">
+        <i class="fas fa-link text-primary"></i>
+        <span>Создать связанный таймлайн</span>
+    </div>
+
+    <div class="context-menu-item" onclick="startConnectionFromHere()">
+        <i class="fas fa-project-diagram text-info"></i>
+        <span>Создать соединение</span>
+    </div>
+
+    <div class="context-menu-item" onclick="editSelectedNode()">
+        <i class="fas fa-edit text-warning"></i>
+        <span>Редактировать таймлайн</span>
+    </div>
+
+    <div class="context-menu-item" onclick="duplicateNode()">
+        <i class="fas fa-copy text-primary"></i>
+        <span>Дублировать таймлайн</span>
+    </div>
+
+    <hr style="margin: 4px 0; border-color: #e5e7eb;">
+
+    <div class="context-menu-item" onclick="arrangeChildren()">
+        <i class="fas fa-sitemap text-info"></i>
+        <span>Упорядочить дочерние таймлайны</span>
+    </div>
+
+    <div class="context-menu-item" onclick="toggleNodeLock()">
+        <i class="fas fa-lock text-secondary"></i>
+        <span id="lockText">Заблокировать позицию</span>
+    </div>
+
+    <hr style="margin: 4px 0; border-color: #e5e7eb;">
+
+    <div class="context-menu-item" onclick="viewNodeDetails()">
+        <i class="fas fa-eye text-primary"></i>
+        <span>Просмотреть детали</span>
+    </div>
+
+    <div class="context-menu-item" onclick="openInNewTab()">
+        <i class="fas fa-external-link-alt text-primary"></i>
+        <span>Открыть в новой вкладке</span>
+    </div>
+
+    <hr style="margin: 4px 0; border-color: #e5e7eb;">
+
+    <div class="context-menu-item menu-danger" onclick="deleteSelectedNode()">
+        <i class="fas fa-trash"></i>
+        <span>Удалить таймлайн</span>
+    </div>
+
+    <div class="context-menu-item" onclick="hideContextMenu()">
+        <i class="fas fa-times"></i>
+        <span>Отмена</span>
+    </div>
+</div>
+
+<script>
+    // Функции для контекстного меню
+
+    function createTimelineHere() {
+        const menu = document.getElementById('contextMenu');
+        const x = parseFloat(menu.dataset.svgX) || 0;
+        const y = parseFloat(menu.dataset.svgY) || 0;
+
+        createTimelineAt(x - NODE_WIDTH / 2, y - NODE_HEIGHT / 2);
+        hideContextMenu();
+    }
+
+    function createConnectedTimeline() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const menu = document.getElementById('contextMenu');
+        const x = parseFloat(menu.dataset.svgX) || 0;
+        const y = parseFloat(menu.dataset.svgY) || 0;
+
+        // Создаем связанный таймлайн
+        createConnectedTimelineAt(x - NODE_WIDTH / 2, y - NODE_HEIGHT / 2);
+        hideContextMenu();
+    }
+
+    function createConnectedTimelineAt(x, y) {
+        const sourceNode = window.boardState.selectedNode;
+        const sourceId = sourceNode ? sourceNode.id.replace('node-', '') : null;
+
+        // Показываем модальное окно с учетом связи
+        fetch(`/timeline/create/connected/${sourceId}/`)
+            .then(response => response.text())
+            .then(html => {
+                const modal = document.getElementById('timelineModal');
+                const modalContent = modal.querySelector('.modal-content');
+                modalContent.innerHTML = html;
+                modal.style.display = 'flex';
+
+                // Добавляем координаты
+                const form = modalContent.querySelector('form');
+                if (form) {
+                    const xInput = document.createElement('input');
+                    xInput.type = 'hidden';
+                    xInput.name = 'position_x';
+                    xInput.value = x;
+
+                    const yInput = document.createElement('input');
+                    yInput.type = 'hidden';
+                    yInput.name = 'position_y';
+                    yInput.value = y;
+
+                    form.appendChild(xInput);
+                    form.appendChild(yInput);
+                }
+            });
+    }
+
+    function startConnectionFromHere() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        startConnection(window.boardState.selectedNode);
+        hideContextMenu();
+    }
+
+    function editSelectedNode() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const timelineId = window.boardState.selectedNode.id.replace('node-', '');
+        window.location.href = `/timeline/${timelineId}/edit/`;
+    }
+
+    function duplicateNode() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const timelineId = window.boardState.selectedNode.id.replace('node-', '');
+
+        // Получаем текущую позицию
+        const x = parseFloat(window.boardState.selectedNode.getAttribute('data-x')) || 0;
+        const y = parseFloat(window.boardState.selectedNode.getAttribute('data-y')) || 0;
+
+        // Дублируем со смещением
+        fetch(`/timeline/${timelineId}/duplicate/board/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                offset_x: 50,
+                offset_y: 50
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Таймлайн продублирован', 'success');
+                // Обновляем доску
+                setTimeout(() => location.reload(), 500);
+            }
+        });
+
+        hideContextMenu();
+    }
+
+    function arrangeChildren() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите родительский таймлайн', 'warning');
+            return;
+        }
+
+        const parentId = window.boardState.selectedNode.id.replace('node-', '');
+
+        fetch(`/board/timeline/${parentId}/arrange-children/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Дочерние таймлайны упорядочены', 'success');
+                // Обновляем позиции
+                data.positions.forEach(pos => {
+                    const node = document.getElementById(`node-${pos.id}`);
+                    if (node) {
+                        node.setAttribute('data-x', pos.x);
+                        node.setAttribute('data-y', pos.y);
+                        node.style.transform = `translate(${pos.x}px, ${pos.y}px)`;
+                        updateConnections(node.id);
+                    }
+                });
+            }
+        });
+
+        hideContextMenu();
+    }
+
+    function toggleNodeLock() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const node = window.boardState.selectedNode;
+        const timelineId = node.id.replace('node-', '');
+        const isLocked = node.classList.contains('locked');
+
+        fetch(`/board/timeline/${timelineId}/toggle-lock/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                if (data.locked) {
+                    node.classList.add('locked');
+                    node.style.cursor = 'not-allowed';
+                    document.getElementById('lockText').textContent = 'Разблокировать позицию';
+                    showToast('Таймлайн заблокирован', 'info');
+                } else {
+                    node.classList.remove('locked');
+                    node.style.cursor = 'move';
+                    document.getElementById('lockText').textContent = 'Заблокировать позицию';
+                    showToast('Таймлайн разблокирован', 'info');
+                }
+            }
+        });
+
+        hideContextMenu();
+    }
+
+    function viewNodeDetails() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const timelineId = window.boardState.selectedNode.id.replace('node-', '');
+        window.open(`/timeline/${timelineId}/`, '_blank');
+        hideContextMenu();
+    }
+
+    function openInNewTab() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        const timelineId = window.boardState.selectedNode.id.replace('node-', '');
+        window.open(`/timeline/${timelineId}/edit/`, '_blank');
+        hideContextMenu();
+    }
+
+    function deleteSelectedNode() {
+        if (!window.boardState.selectedNode) {
+            showToast('Сначала выберите таймлайн', 'warning');
+            return;
+        }
+
+        if (!confirm('Удалить этот таймлайн? Все дочерние связи будут удалены.')) {
+            hideContextMenu();
+            return;
+        }
+
+        const timelineId = window.boardState.selectedNode.id.replace('node-', '');
+
+        fetch(`/timeline/${timelineId}/delete/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Удаляем узел с анимацией
+                const node = window.boardState.selectedNode;
+                node.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => {
+                    node.remove();
+                    updateUI();
+
+                    // Удаляем связанные соединения
+                    removeConnectionsForNode(timelineId);
+                }, 300);
+
+                showToast('Таймлайн удален', 'success');
+            } else {
+                showToast(data.error || 'Ошибка удаления', 'error');
+            }
+        });
+
+        hideContextMenu();
+    }
+
+    function removeConnectionsForNode(nodeId) {
+        window.boardState.connections = window.boardState.connections.filter(conn => {
+            if (conn.source === nodeId || conn.target === nodeId) {
+                conn.element.remove();
+                return false;
+            }
+            return true;
+        });
+    }
+
+    // Обновляем меню в зависимости от выбранного узла
+    document.addEventListener('contextmenu', function(e) {
+        const menu = document.getElementById('contextMenu');
+        const connectItem = document.getElementById('connectMenuItem');
+
+        if (window.boardState.selectedNode) {
+            connectItem.style.display = 'block';
+        } else {
+            connectItem.style.display = 'none';
+        }
+    });
+
+    // Выделение узла при клике
+    document.addEventListener('click', function(e) {
+        const node = e.target.closest('.timeline-node');
+
+        // Снимаем выделение со всех узлов
+        document.querySelectorAll('.timeline-node').forEach(n => {
+            n.classList.remove('selected');
+        });
+
+        if (node) {
+            node.classList.add('selected');
+            window.boardState.selectedNode = node;
+
+            // Если в режиме соединения
+            if (window.boardState.isConnecting && window.boardState.sourceNode !== node) {
+                completeConnection(node);
+            }
+        } else {
+            window.boardState.selectedNode = null;
+        }
+    });
+
+    // Добавляем стили для выделения и блокировки
+    const menuStyles = document.createElement('style');
+    menuStyles.textContent = `
+        .timeline-node.selected .node-body {
+            stroke-width: 3;
+            stroke: #3b82f6;
+        }
+
+        .timeline-node.locked {
+            opacity: 0.8;
+        }
+
+        .timeline-node.locked .node-header {
+            fill: #6b7280;
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0; transform: scale(0.8); }
+        }
+
+        .context-menu hr {
+            margin: 4px 0;
+            border: none;
+            border-top: 1px solid #e5e7eb;
+        }
+    `;
+    document.head.appendChild(menuStyles);
+</script>

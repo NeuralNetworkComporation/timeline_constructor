@@ -1,0 +1,1223 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    /* Стили для доски */
+    :root {
+        --board-bg: #f8fafc;
+        --grid-color: rgba(0, 0, 0, 0.05);
+        --node-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --node-shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .board-container {
+        width: 100vw;
+        height: calc(100vh - 56px);
+        position: relative;
+        background: var(--board-bg);
+        cursor: grab;
+        overflow: hidden;
+    }
+
+    .board-container:active {
+        cursor: grabbing;
+    }
+
+    #board {
+        position: absolute;
+        width: 10000px;
+        height: 10000px;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+        transition: transform 0.1s ease-out;
+    }
+
+    .grid-pattern {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image:
+            linear-gradient(var(--grid-color) 1px, transparent 1px),
+            linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+        background-size: {{ grid_size }}px {{ grid_size }}px;
+        pointer-events: none;
+    }
+
+    /* Узлы */
+    .board-node {
+        position: absolute;
+        width: 280px;
+        min-height: 180px;
+        background: white;
+        border-radius: 12px;
+        box-shadow: var(--node-shadow);
+        border: 2px solid transparent;
+        cursor: move;
+        transition: all 0.2s ease;
+        user-select: none;
+        overflow: hidden;
+        z-index: 10;
+    }
+
+    .board-node:hover {
+        box-shadow: var(--node-shadow-hover);
+        transform: translateY(-2px);
+    }
+
+    .board-node.dragging {
+        opacity: 0.9;
+        z-index: 1000;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+        cursor: grabbing;
+    }
+
+    .board-node.locked {
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    .node-header {
+        height: 40px;
+        border-radius: 10px 10px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 15px;
+        color: white;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .node-header-actions {
+        display: flex;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .board-node:hover .node-header-actions {
+        opacity: 1;
+    }
+
+    .node-btn {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: none;
+        background: rgba(255,255,255,0.2);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .node-btn:hover {
+        background: rgba(255,255,255,0.3);
+    }
+
+    .node-content {
+        padding: 15px;
+    }
+
+    .node-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #1f2937;
+    }
+
+    .node-description {
+        color: #6b7280;
+        font-size: 13px;
+        line-height: 1.4;
+        margin-bottom: 10px;
+    }
+
+    .node-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px solid #f3f4f6;
+        font-size: 11px;
+        color: #9ca3af;
+    }
+
+    /* Точки соединения */
+    .connection-point {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: white;
+        border: 2px solid #3b82f6;
+        transform: translate(-50%, -50%);
+        pointer-events: auto;
+        cursor: crosshair;
+        z-index: 20;
+    }
+
+    .connection-point:hover {
+        background: #3b82f6;
+        transform: translate(-50%, -50%) scale(1.2);
+    }
+
+    /* Панель инструментов */
+    .board-toolbar {
+        position: fixed;
+        top: 80px;
+        left: 20px;
+        background: white;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 1000;
+    }
+
+    .tool-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        border: 2px solid #e5e7eb;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #6b7280;
+    }
+
+    .tool-btn:hover {
+        border-color: #10b981;
+        background: #f0fdf4;
+        color: #10b981;
+        transform: translateY(-2px);
+    }
+
+    .tool-btn.active {
+        background: #10b981;
+        color: white;
+        border-color: #10b981;
+    }
+
+    /* Контекстное меню */
+    .context-menu {
+        position: fixed;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+        z-index: 10000;
+        min-width: 200px;
+        display: none;
+        overflow: hidden;
+        border: 1px solid #e5e7eb;
+    }
+
+    .context-item {
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .context-item:last-child {
+        border-bottom: none;
+    }
+
+    .context-item:hover {
+        background: #f3f4f6;
+    }
+
+    .context-item i {
+        width: 16px;
+        color: #6b7280;
+    }
+
+    .context-item.text-danger {
+        color: #ef4444;
+    }
+
+    .context-item.text-danger i {
+        color: #ef4444;
+    }
+
+    /* Соединения */
+    .connections-layer {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 5;
+    }
+
+    .connection-line {
+        stroke-width: 2;
+        fill: none;
+        pointer-events: stroke;
+        cursor: pointer;
+    }
+
+    .connection-line:hover {
+        stroke-width: 3;
+    }
+
+    /* Модальные окна */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+</style>
+
+<div id="board-container" class="board-container">
+    <!-- Панель инструментов -->
+    <div class="board-toolbar">
+        <button class="tool-btn" onclick="createNodeAtCursor()" title="Создать узел">
+            <i class="fas fa-plus"></i>
+        </button>
+        <button class="tool-btn" onclick="toggleGrid()" title="Сетка">
+            <i class="fas fa-th"></i>
+        </button>
+        <button class="tool-btn" id="connectBtn" onclick="toggleConnectMode()" title="Режим соединения">
+            <i class="fas fa-link"></i>
+        </button>
+        <button class="tool-btn" onclick="arrangeNodes()" title="Авторасположение">
+            <i class="fas fa-project-diagram"></i>
+        </button>
+        <button class="tool-btn" onclick="zoomIn()" title="Увеличить">
+            <i class="fas fa-search-plus"></i>
+        </button>
+        <button class="tool-btn" onclick="zoomOut()" title="Уменьшить">
+            <i class="fas fa-search-minus"></i>
+        </button>
+        <button class="tool-btn" onclick="resetView()" title="Сброс вида">
+            <i class="fas fa-expand"></i>
+        </button>
+    </div>
+
+    <!-- Основная доска -->
+    <div id="board" class="board">
+        <!-- Сетка -->
+        <div class="grid-pattern" id="grid"></div>
+
+        <!-- Слой для соединений -->
+        <svg id="connections-layer" class="connections-layer"></svg>
+
+        <!-- Узлы -->
+        <div id="nodes-container">
+            {% for node in nodes %}
+            <div class="board-node {% if node.is_locked %}locked{% endif %}"
+                 id="node-{{ node.id }}"
+                 data-id="{{ node.id }}"
+                 style="left: {{ node.x }}px; top: {{ node.y }}px;
+                        border-color: {{ node.border_color }};
+                        background: {{ node.bg_color }};">
+
+                <!-- Заголовок -->
+                <div class="node-header" style="background: {{ node.color }};">
+                    <span class="node-title-text">{{ node.title }}</span>
+                    <div class="node-header-actions">
+                        <button onclick="toggleLock({{ node.id }})"
+                                class="node-btn"
+                                title="{% if node.is_locked %}Разблокировать{% else %}Заблокировать{% endif %}">
+                            <i class="fas fa-{% if node.is_locked %}lock{% else %}unlock{% endif %}"></i>
+                        </button>
+                        <button onclick="editNode({{ node.id }})"
+                                class="node-btn"
+                                title="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Контент -->
+                <div class="node-content">
+                    {% if node.description %}
+                    <div class="node-description">
+                        {{ node.description|truncatechars:100 }}
+                    </div>
+                    {% endif %}
+
+                    <div class="node-meta">
+                        <span>{{ node.created_at|date:"d.m.Y" }}</span>
+                        {% if node.timeline %}
+                        <span title="Связан с таймлайном">
+                            <i class="fas fa-link"></i>
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Точки соединения -->
+                <div class="connection-points">
+                    <div class="connection-point top" style="top: 0; left: 50%;"
+                         data-node="{{ node.id }}" data-side="top"></div>
+                    <div class="connection-point right" style="top: 50%; right: 0;"
+                         data-node="{{ node.id }}" data-side="right"></div>
+                    <div class="connection-point bottom" style="bottom: 0; left: 50%;"
+                         data-node="{{ node.id }}" data-side="bottom"></div>
+                    <div class="connection-point left" style="top: 50%; left: 0;"
+                         data-node="{{ node.id }}" data-side="left"></div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Контекстное меню -->
+<div id="context-menu" class="context-menu">
+    <div class="context-item" onclick="createNodeAtMenu()">
+        <i class="fas fa-plus-circle text-success"></i>
+        <span>Создать новый узел</span>
+    </div>
+    <div class="context-item" onclick="importTimelineFromMenu()">
+        <i class="fas fa-download text-primary"></i>
+        <span>Импортировать таймлайн</span>
+    </div>
+    <div class="context-item" onclick="startConnectionFromMenu()" id="connectMenuItem">
+        <i class="fas fa-link text-info"></i>
+        <span>Создать соединение</span>
+    </div>
+    <div class="context-divider"></div>
+    <div class="context-item" onclick="selectAllNodes()">
+        <i class="fas fa-object-group text-primary"></i>
+        <span>Выделить все</span>
+    </div>
+    <div class="context-item" onclick="clearSelection()">
+        <i class="fas fa-times-circle text-secondary"></i>
+        <span>Снять выделение</span>
+    </div>
+    <div class="context-divider"></div>
+    <div class="context-item text-danger" onclick="clearBoard()">
+        <i class="fas fa-trash"></i>
+        <span>Очистить доску</span>
+    </div>
+</div>
+
+<!-- Модальное окно создания узла -->
+<div id="node-modal" class="modal-overlay">
+    <div class="modal-content">
+        <form id="node-form">
+            <div class="modal-header">
+                <h5 class="modal-title">Создать узел</h5>
+                <button type="button" class="btn-close" onclick="closeModal()"></button>
+            </div>
+            <div class="modal-body">
+                {% csrf_token %}
+                <input type="hidden" id="node-x">
+                <input type="hidden" id="node-y">
+
+                <div class="mb-3">
+                    <label class="form-label">Название *</label>
+                    <input type="text" id="node-title" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Описание</label>
+                    <textarea id="node-description" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-4">
+                        <label class="form-label">Цвет заголовка</label>
+                        <select id="node-color" class="form-select">
+                            <option value="#10b981">Зеленый</option>
+                            <option value="#3b82f6">Синий</option>
+                            <option value="#8b5cf6">Фиолетовый</option>
+                            <option value="#f59e0b">Оранжевый</option>
+                            <option value="#ef4444">Красный</option>
+                        </select>
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Цвет фона</label>
+                        <input type="color" id="node-bg-color" class="form-control" value="#ffffff">
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label">Цвет рамки</label>
+                        <input type="color" id="node-border-color" class="form-control" value="#10b981">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Отмена</button>
+                <button type="submit" class="btn btn-primary">Создать</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+// Глобальные переменные
+let boardState = {
+    scale: 1,
+    offsetX: 0,
+    offsetY: 0,
+    isPanning: false,
+    isConnecting: false,
+    connectingFrom: null,
+    connectingSide: null,
+    selectedNode: null,
+    selectedNodes: new Set(),
+    contextMenuX: 0,
+    contextMenuY: 0
+};
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', function() {
+    initBoard();
+    loadConnections();
+});
+
+function initBoard() {
+    const container = document.getElementById('board-container');
+    const board = document.getElementById('board');
+
+    // Устанавливаем начальную позицию в центр
+    boardState.offsetX = container.clientWidth / 2 - 5000;
+    boardState.offsetY = container.clientHeight / 2 - 5000;
+    updateBoardTransform();
+
+    // Инициализация перетаскивания узлов
+    initNodeDragging();
+
+    // Панорамирование
+    initPanning();
+
+    // Контекстное меню
+    container.addEventListener('contextmenu', showContextMenu);
+
+    // Скрытие контекстного меню
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.context-menu')) {
+            hideContextMenu();
+        }
+    });
+
+    // Форма создания узла
+    document.getElementById('node-form').addEventListener('submit', saveNode);
+}
+
+function initNodeDragging() {
+    document.querySelectorAll('.board-node:not(.locked)').forEach(node => {
+        const header = node.querySelector('.node-header');
+        header.style.cursor = 'move';
+
+        let isDragging = false;
+        let startX, startY, startLeft, startTop;
+
+        header.addEventListener('mousedown', startDrag);
+
+        function startDrag(e) {
+            if (e.button !== 0 || boardState.isConnecting) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            const rect = node.getBoundingClientRect();
+            const boardRect = document.getElementById('board').getBoundingClientRect();
+
+            startLeft = (rect.left - boardRect.left) / boardState.scale;
+            startTop = (rect.top - boardRect.top) / boardState.scale;
+
+            node.classList.add('dragging');
+            document.body.style.cursor = 'grabbing';
+
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+        }
+
+        function doDrag(e) {
+            if (!isDragging) return;
+
+            const deltaX = (e.clientX - startX) / boardState.scale;
+            const deltaY = (e.clientY - startY) / boardState.scale;
+
+            const newX = startLeft + deltaX;
+            const newY = startTop + deltaY;
+
+            node.style.left = newX + 'px';
+            node.style.top = newY + 'px';
+
+            updateNodeConnections(node.dataset.id);
+        }
+
+        function stopDrag() {
+            if (!isDragging) return;
+
+            isDragging = false;
+            node.classList.remove('dragging');
+            document.body.style.cursor = '';
+
+            // Сохраняем позицию
+            const nodeId = node.dataset.id;
+            const x = parseFloat(node.style.left);
+            const y = parseFloat(node.style.top);
+
+            saveNodePosition(nodeId, x, y);
+
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+        }
+    });
+}
+
+// Панорамирование доски
+function initPanning() {
+    const container = document.getElementById('board-container');
+    let startPanX, startPanY, startOffsetX, startOffsetY;
+
+    container.addEventListener('mousedown', function(e) {
+        // Средняя кнопка мыши или Alt + левая кнопка для панорамирования
+        if (e.button === 1 || (e.button === 0 && e.altKey)) {
+            boardState.isPanning = true;
+            startPanX = e.clientX;
+            startPanY = e.clientY;
+            startOffsetX = boardState.offsetX;
+            startOffsetY = boardState.offsetY;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
+    container.addEventListener('mousemove', function(e) {
+        if (!boardState.isPanning) return;
+
+        const deltaX = e.clientX - startPanX;
+        const deltaY = e.clientY - startPanY;
+
+        boardState.offsetX = startOffsetX + deltaX;
+        boardState.offsetY = startOffsetY + deltaY;
+        updateBoardTransform();
+    });
+
+    container.addEventListener('mouseup', function() {
+        boardState.isPanning = false;
+        container.style.cursor = '';
+    });
+
+    container.addEventListener('mouseleave', function() {
+        boardState.isPanning = false;
+        container.style.cursor = '';
+    });
+
+    // Масштабирование колесиком мыши
+    container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.1, Math.min(3, boardState.scale * delta));
+
+        // Масштабируем относительно курсора
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const scaleFactor = newScale / boardState.scale;
+
+        boardState.offsetX = mouseX - (mouseX - boardState.offsetX) * scaleFactor;
+        boardState.offsetY = mouseY - (mouseY - boardState.offsetY) * scaleFactor;
+        boardState.scale = newScale;
+
+        updateBoardTransform();
+    });
+}
+
+function updateBoardTransform() {
+    const board = document.getElementById('board');
+    board.style.transform = `translate(${boardState.offsetX}px, ${boardState.offsetY}px) scale(${boardState.scale})`;
+}
+
+function zoomIn() {
+    boardState.scale = Math.min(3, boardState.scale * 1.2);
+    updateBoardTransform();
+}
+
+function zoomOut() {
+    boardState.scale = Math.max(0.1, boardState.scale / 1.2);
+    updateBoardTransform();
+}
+
+function resetView() {
+    const container = document.getElementById('board-container');
+    boardState.scale = 1;
+    boardState.offsetX = container.clientWidth / 2 - 5000;
+    boardState.offsetY = container.clientHeight / 2 - 5000;
+    updateBoardTransform();
+}
+
+function toggleGrid() {
+    const grid = document.getElementById('grid');
+    grid.style.display = grid.style.display === 'none' ? 'block' : 'none';
+}
+
+// Контекстное меню
+function showContextMenu(e) {
+    e.preventDefault();
+
+    const menu = document.getElementById('context-menu');
+    menu.style.display = 'block';
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+
+    // Сохраняем координаты клика
+    const container = document.getElementById('board-container');
+    const rect = container.getBoundingClientRect();
+
+    boardState.contextMenuX = (e.clientX - rect.left - boardState.offsetX) / boardState.scale;
+    boardState.contextMenuY = (e.clientY - rect.top - boardState.offsetY) / boardState.scale;
+
+    // Проверяем, кликнули ли на узел
+    const node = e.target.closest('.board-node');
+    if (node) {
+        boardState.selectedNode = node.dataset.id;
+        // Показываем дополнительные пункты меню для узла
+        document.getElementById('connectMenuItem').style.display = 'block';
+    } else {
+        boardState.selectedNode = null;
+        document.getElementById('connectMenuItem').style.display = 'none';
+    }
+}
+
+function hideContextMenu() {
+    document.getElementById('context-menu').style.display = 'none';
+}
+
+// Создание узла через контекстное меню
+function createNodeAtMenu() {
+    const x = boardState.contextMenuX;
+    const y = boardState.contextMenuY;
+
+    document.getElementById('node-x').value = x;
+    document.getElementById('node-y').value = y;
+    document.getElementById('node-modal').style.display = 'flex';
+    document.getElementById('node-title').focus();
+    hideContextMenu();
+}
+
+// Создание узла по кнопке
+function createNodeAtCursor() {
+    const container = document.getElementById('board-container');
+    const rect = container.getBoundingClientRect();
+
+    // Позиция в центре видимой области
+    const x = (-boardState.offsetX / boardState.scale) + (rect.width / 2 / boardState.scale) - 140;
+    const y = (-boardState.offsetY / boardState.scale) + (rect.height / 2 / boardState.scale) - 90;
+
+    document.getElementById('node-x').value = x;
+    document.getElementById('node-y').value = y;
+    document.getElementById('node-modal').style.display = 'flex';
+    document.getElementById('node-title').focus();
+}
+
+// Сохранение узла
+function saveNode(e) {
+    e.preventDefault();
+
+    const formData = {
+        title: document.getElementById('node-title').value,
+        description: document.getElementById('node-description').value,
+        color: document.getElementById('node-color').value,
+        bg_color: document.getElementById('node-bg-color').value,
+        border_color: document.getElementById('node-border-color').value,
+        x: parseFloat(document.getElementById('node-x').value),
+        y: parseFloat(document.getElementById('node-y').value)
+    };
+
+    fetch('/board/node/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            addNodeToBoard(data.node);
+            closeModal();
+            showToast('Узел создан', 'success');
+        } else {
+            showToast('Ошибка: ' + data.error, 'error');
+        }
+    })
+    .catch(error => {
+        showToast('Ошибка сети', 'error');
+    });
+}
+
+function addNodeToBoard(node) {
+    const nodesContainer = document.getElementById('nodes-container');
+
+    const nodeHtml = `
+        <div class="board-node"
+             id="node-${node.id}"
+             data-id="${node.id}"
+             style="left: ${node.x}px; top: ${node.y}px;
+                    border-color: ${node.border_color};
+                    background: ${node.bg_color};">
+
+            <div class="node-header" style="background: ${node.color};">
+                <span class="node-title-text">${node.title}</span>
+                <div class="node-header-actions">
+                    <button onclick="toggleLock(${node.id})" class="node-btn" title="Заблокировать">
+                        <i class="fas fa-unlock"></i>
+                    </button>
+                    <button onclick="editNode(${node.id})" class="node-btn" title="Редактировать">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="node-content">
+                ${node.description ? `<div class="node-description">${node.description.substring(0, 100)}${node.description.length > 100 ? '...' : ''}</div>` : ''}
+
+                <div class="node-meta">
+                    <span>${new Date().toLocaleDateString()}</span>
+                </div>
+            </div>
+
+            <div class="connection-points">
+                <div class="connection-point top" style="top: 0; left: 50%;"
+                     data-node="${node.id}" data-side="top"></div>
+                <div class="connection-point right" style="top: 50%; right: 0;"
+                     data-node="${node.id}" data-side="right"></div>
+                <div class="connection-point bottom" style="bottom: 0; left: 50%;"
+                     data-node="${node.id}" data-side="bottom"></div>
+                <div class="connection-point left" style="top: 50%; left: 0;"
+                     data-node="${node.id}" data-side="left"></div>
+            </div>
+        </div>
+    `;
+
+    nodesContainer.insertAdjacentHTML('beforeend', nodeHtml);
+    initNodeDragging(); // Инициализируем перетаскивание для нового узла
+    initConnectionPoints(); // Инициализируем точки соединения
+}
+
+// Режим соединения
+function toggleConnectMode() {
+    const btn = document.getElementById('connectBtn');
+
+    if (boardState.isConnecting) {
+        boardState.isConnecting = false;
+        boardState.connectingFrom = null;
+        btn.classList.remove('active');
+        showToast('Режим соединения выключен', 'info');
+    } else {
+        boardState.isConnecting = true;
+        btn.classList.add('active');
+        showToast('Выберите первый узел для соединения', 'info');
+    }
+}
+
+function initConnectionPoints() {
+    document.querySelectorAll('.connection-point').forEach(point => {
+        point.addEventListener('click', function(e) {
+            e.stopPropagation();
+
+            if (!boardState.isConnecting) return;
+
+            const nodeId = this.dataset.node;
+            const side = this.dataset.side;
+
+            if (!boardState.connectingFrom) {
+                // Первый узел для соединения
+                boardState.connectingFrom = nodeId;
+                boardState.connectingSide = side;
+                this.style.background = '#10b981';
+                showToast('Теперь выберите второй узел', 'info');
+            } else if (boardState.connectingFrom !== nodeId) {
+                // Второй узел - создаем соединение
+                createConnection(boardState.connectingFrom, nodeId);
+
+                // Сбрасываем состояние
+                document.querySelectorAll('.connection-point').forEach(p => {
+                    p.style.background = 'white';
+                });
+                boardState.connectingFrom = null;
+                boardState.connectingSide = null;
+            }
+        });
+    });
+}
+
+function createConnection(fromId, toId) {
+    fetch('/board/connection/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            source: fromId,
+            target: toId,
+            color: '#3b82f6'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            addConnectionToBoard(data.connection);
+            showToast('Соединение создано', 'success');
+        } else {
+            showToast('Ошибка: ' + data.error, 'error');
+        }
+    });
+}
+
+function addConnectionToBoard(connection) {
+    const svg = document.getElementById('connections-layer');
+    const fromNode = document.getElementById(`node-${connection.source}`);
+    const toNode = document.getElementById(`node-${connection.target}`);
+
+    if (!fromNode || !toNode) return;
+
+    const fromRect = fromNode.getBoundingClientRect();
+    const toRect = toNode.getBoundingClientRect();
+    const boardRect = document.getElementById('board').getBoundingClientRect();
+
+    // Координаты с учетом масштаба и смещения
+    const fromX = (fromRect.left - boardRect.left + fromRect.width / 2) / boardState.scale;
+    const fromY = (fromRect.top - boardRect.top + fromRect.height / 2) / boardState.scale;
+    const toX = (toRect.left - boardRect.left + toRect.width / 2) / boardState.scale;
+    const toY = (toRect.top - boardRect.top + toRect.height / 2) / boardState.scale;
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', fromX);
+    line.setAttribute('y1', fromY);
+    line.setAttribute('x2', toX);
+    line.setAttribute('y2', toY);
+    line.setAttribute('stroke', connection.color);
+    line.setAttribute('stroke-width', '2');
+    line.setAttribute('class', 'connection-line');
+    line.setAttribute('data-id', connection.id);
+    line.setAttribute('data-source', connection.source);
+    line.setAttribute('data-target', connection.target);
+
+    // Добавляем стрелку
+    const marker = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+    marker.setAttribute('id', `arrow-${connection.id}`);
+    marker.setAttribute('viewBox', '0 0 10 10');
+    marker.setAttribute('refX', '9');
+    marker.setAttribute('refY', '5');
+    marker.setAttribute('markerWidth', '6');
+    marker.setAttribute('markerHeight', '6');
+    marker.setAttribute('orient', 'auto');
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+    path.setAttribute('fill', connection.color);
+
+    marker.appendChild(path);
+    svg.appendChild(marker);
+
+    line.setAttribute('marker-end', `url(#arrow-${connection.id})`);
+    svg.appendChild(line);
+
+    // Добавляем обработчик для удаления соединения
+    line.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (confirm('Удалить соединение?')) {
+            deleteConnection(connection.id);
+        }
+    });
+}
+
+function loadConnections() {
+    // Загружаем существующие соединения
+    {% for connection in connections %}
+    addConnectionToBoard({
+        id: {{ connection.id }},
+        source: {{ connection.from_node.id }},
+        target: {{ connection.to_node.id }},
+        color: '{{ connection.color }}'
+    });
+    {% endfor %}
+
+    initConnectionPoints();
+}
+
+function deleteConnection(connectionId) {
+    fetch(`/board/connection/${connectionId}/delete/`, {
+        method: 'DELETE',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Удаляем линию из SVG
+            const line = document.querySelector(`.connection-line[data-id="${connectionId}"]`);
+            if (line) line.remove();
+
+            // Удаляем маркер
+            const marker = document.getElementById(`arrow-${connectionId}`);
+            if (marker) marker.remove();
+
+            showToast('Соединение удалено', 'success');
+        }
+    });
+}
+
+// Остальные функции
+function updateNodeConnections(nodeId) {
+    // Обновляем линии соединений для узла
+    document.querySelectorAll(`.connection-line[data-source="${nodeId}"], .connection-line[data-target="${nodeId}"]`).forEach(line => {
+        const sourceNode = document.getElementById(`node-${line.dataset.source}`);
+        const targetNode = document.getElementById(`node-${line.dataset.target}`);
+
+        if (!sourceNode || !targetNode) return;
+
+        const sourceRect = sourceNode.getBoundingClientRect();
+        const targetRect = targetNode.getBoundingClientRect();
+        const boardRect = document.getElementById('board').getBoundingClientRect();
+
+        const fromX = (sourceRect.left - boardRect.left + sourceRect.width / 2) / boardState.scale;
+        const fromY = (sourceRect.top - boardRect.top + sourceRect.height / 2) / boardState.scale;
+        const toX = (targetRect.left - boardRect.left + targetRect.width / 2) / boardState.scale;
+        const toY = (targetRect.top - boardRect.top + targetRect.height / 2) / boardState.scale;
+
+        line.setAttribute('x1', fromX);
+        line.setAttribute('y1', fromY);
+        line.setAttribute('x2', toX);
+        line.setAttribute('y2', toY);
+    });
+}
+
+function saveNodePosition(nodeId, x, y) {
+    fetch(`/board/node/${nodeId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ x: x, y: y })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Ошибка сохранения позиции:', data.error);
+        }
+    });
+}
+
+function toggleLock(nodeId) {
+    const node = document.getElementById(`node-${nodeId}`);
+    const isLocked = node.classList.contains('locked');
+
+    fetch(`/board/node/${nodeId}/update/`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ is_locked: !isLocked })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            if (isLocked) {
+                node.classList.remove('locked');
+                showToast('Узел разблокирован', 'success');
+            } else {
+                node.classList.add('locked');
+                showToast('Узел заблокирован', 'success');
+            }
+            initNodeDragging(); // Переинициализируем перетаскивание
+        }
+    });
+}
+
+function editNode(nodeId) {
+    // Загружаем данные узла и открываем форму редактирования
+    fetch(`/board/node/${nodeId}/update/`, {
+        method: 'GET',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('node-title').value = data.node.title;
+            document.getElementById('node-description').value = data.node.description;
+            document.getElementById('node-color').value = data.node.color;
+            document.getElementById('node-bg-color').value = data.node.bg_color;
+            document.getElementById('node-border-color').value = data.node.border_color;
+
+            // Сохраняем ID для обновления
+            document.getElementById('node-form').dataset.editId = nodeId;
+
+            // Позиция остается прежней
+            document.getElementById('node-x').value = data.node.x;
+            document.getElementById('node-y').value = data.node.y;
+
+            document.getElementById('node-modal').style.display = 'flex';
+            document.querySelector('.modal-title').textContent = 'Редактировать узел';
+            document.querySelector('button[type="submit"]').textContent = 'Сохранить';
+        }
+    });
+}
+
+function arrangeNodes() {
+    fetch('/board/arrange/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Обновляем позиции узлов
+            data.positions.forEach(pos => {
+                const node = document.getElementById(`node-${pos.id}`);
+                if (node) {
+                    node.style.left = pos.x + 'px';
+                    node.style.top = pos.y + 'px';
+                    updateNodeConnections(pos.id);
+                }
+            });
+            showToast(data.message, 'success');
+        }
+    });
+}
+
+function clearBoard() {
+    if (!confirm('Очистить всю доску? Все узлы и соединения будут удалены.')) return;
+
+    fetch('/board/clear/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Удаляем все узлы и соединения
+            document.querySelectorAll('.board-node').forEach(node => node.remove());
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            showToast('Доска очищена', 'success');
+        }
+    });
+}
+
+function closeModal() {
+    document.getElementById('node-modal').style.display = 'none';
+    document.getElementById('node-form').reset();
+    delete document.getElementById('node-form').dataset.editId;
+    document.querySelector('.modal-title').textContent = 'Создать узел';
+    document.querySelector('button[type="submit"]').textContent = 'Создать';
+}
+
+// Вспомогательные функции
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function showToast(message, type = 'info') {
+    // Создаем простой toast (можно заменить на более красивый)
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#3b82f6'};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+    `;
+
+    toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+        ${message}
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
+// Добавляем стили для анимаций
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    .context-divider {
+        height: 1px;
+        background: #e5e7eb;
+        margin: 4px 0;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

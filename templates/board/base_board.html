@@ -1,0 +1,383 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MathTimeline Board - Интерактивная доска</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Roboto Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Vector Graphics Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.js@3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.draggable.js@3.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@svgdotjs/svg.panzoom.js@2.0"></script>
+
+    <style>
+        :root {
+            --board-bg: #f5f5f7;
+            --node-bg: #ffffff;
+            --primary-color: #10b981;
+            --primary-dark: #059669;
+            --accent-color: #3b82f6;
+            --text-dark: #1f2937;
+            --text-light: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            overflow: hidden;
+            background: var(--board-bg);
+            height: 100vh;
+            width: 100vw;
+        }
+
+        .board-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        #board-svg {
+            width: 100%;
+            height: 100%;
+            background: var(--board-bg);
+            cursor: grab;
+        }
+
+        #board-svg:active {
+            cursor: grabbing;
+        }
+
+        /* Сетка на заднем плане */
+        .grid-pattern {
+            fill: none;
+            stroke: rgba(0, 0, 0, 0.05);
+            stroke-width: 1;
+        }
+
+        /* Стили для узлов */
+        .timeline-node {
+            cursor: move;
+            filter: drop-shadow(var(--shadow));
+            transition: all 0.3s ease;
+        }
+
+        .timeline-node:hover {
+            filter: drop-shadow(var(--shadow-lg));
+            transform: scale(1.02);
+        }
+
+        .node-body {
+            fill: white;
+            stroke: var(--border-color);
+            stroke-width: 2;
+            rx: 12;
+            ry: 12;
+        }
+
+        .node-header {
+            fill: var(--primary-color);
+            rx: 12 12 0 0;
+        }
+
+        .node-title {
+            fill: white;
+            font-weight: 600;
+            font-size: 14px;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .node-content {
+            fill: var(--node-bg);
+        }
+
+        .node-event-count {
+            fill: var(--primary-dark);
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .node-actions {
+            fill: var(--text-light);
+            font-size: 12px;
+        }
+
+        /* Связи между узлами */
+        .connection-line {
+            stroke: var(--accent-color);
+            stroke-width: 2;
+            stroke-dasharray: 5, 5;
+            fill: none;
+            marker-end: url(#arrowhead);
+        }
+
+        .connection-line:hover {
+            stroke-width: 3;
+            stroke-dasharray: none;
+        }
+
+        /* Контекстное меню */
+        .context-menu {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            min-width: 200px;
+            display: none;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        .context-menu-item {
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .context-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-menu-item:hover {
+            background: #f3f4f6;
+        }
+
+        .context-menu-item i {
+            width: 20px;
+            color: var(--text-light);
+        }
+
+        .menu-danger {
+            color: #ef4444;
+        }
+
+        .menu-danger i {
+            color: #ef4444;
+        }
+
+        /* Панель управления */
+        .board-navbar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px 20px;
+            box-shadow: var(--shadow);
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .board-btn {
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .board-btn:hover {
+            border-color: var(--primary-color);
+            background: rgba(16, 185, 129, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .board-btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .board-btn-primary:hover {
+            background: var(--primary-dark);
+            border-color: var(--primary-dark);
+        }
+
+        /* Модальное окно создания таймлайна */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Инструменты масштабирования */
+        .zoom-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: var(--shadow);
+        }
+
+        .zoom-btn:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        /* Статус бар */
+        .status-bar {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-light);
+            box-shadow: var(--shadow);
+        }
+
+        /* Анимации */
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .board-navbar {
+                top: 10px;
+                padding: 8px 12px;
+            }
+
+            .board-btn {
+                padding: 6px 12px;
+                font-size: 14px;
+            }
+
+            .zoom-controls {
+                bottom: 20px;
+                right: 20px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% include 'board/board_navbar.html' %}
+
+    <div class="board-container">
+        {% block board_content %}
+        {% endblock %}
+    </div>
+
+    {% include 'board/node_menu.html' %}
+
+    <!-- Модальные окна -->
+    <div id="timelineModal" class="modal-overlay">
+        <div class="modal-content">
+            <!-- Загружается через AJAX -->
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Drag & Drop полифилы для мобильных -->
+    <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10"></script>
+
+    <script>
+        // Глобальные переменные для состояния доски
+        window.boardState = {
+            zoom: 1,
+            offsetX: 0,
+            offsetY: 0,
+            selectedNode: null,
+            connections: [],
+            nodes: {},
+            isDragging: false,
+            isConnecting: false,
+            sourceNode: null
+        };
+
+        // Константы
+        const GRID_SIZE = 50;
+        const NODE_WIDTH = 220;
+        const NODE_HEIGHT = 140;
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

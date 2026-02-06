@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div id="board-container" style="width: 100vw; height: calc(100vh - 60px); overflow: hidden; position: relative; background: #f8fafc;">
+
+    <!-- Панель инструментов -->
+    <div style="position: absolute; top: 20px; left: 20px; z-index: 1000; background: white; padding: 10px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <button onclick="createTimeline()" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 2px;">
+            <i class="fas fa-plus"></i> Новый таймлайн
+        </button>
+        <button onclick="resetView()" style="background: #3b82f6; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin: 2px;">
+            <i class="fas fa-expand"></i> Сброс
+        </button>
+    </div>
+
+    <!-- Основная доска -->
+    <div id="board" style="position: absolute; width: 5000px; height: 5000px; top: 0; left: 0; transform-origin: 0 0;">
+        <!-- Сетка -->
+        <div style="position: absolute; width: 100%; height: 100%;
+              background-image:
+                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+              background-size: {{ grid_size }}px {{ grid_size }}px;"></div>
+
+        <!-- Таймлайны -->
+        {% for timeline in timelines %}
+        <div class="timeline-node"
+             id="node-{{ timeline.id }}"
+             data-id="{{ timeline.id }}"
+             style="position: absolute;
+                    left: {{ timeline.board_x }}px;
+                    top: {{ timeline.board_y }}px;
+                    width: 250px;
+                    min-height: 150px;
+                    background: white;
+                    border: 2px solid {{ timeline.color_scheme|default:'#10b981' }};
+                    border-radius: 10px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    cursor: move;
+                    user-select: none;
+                    transition: transform 0.1s;">
+
+            <div style="background: {{ timeline.color_scheme|default:'#10b981' }};
+                 color: white;
+                 padding: 12px;
+                 border-radius: 8px 8px 0 0;
+                 font-weight: bold;
+                 font-size: 14px;">
+                {{ timeline.title }}
+                <span style="float: right; font-size: 12px; opacity: 0.8;">
+                    {{ timeline.events.count }} событ.
+                </span>
+            </div>
+
+            <div style="padding: 12px; font-size: 13px; color: #555;">
+                {% if timeline.description %}
+                    {{ timeline.description|truncatechars:80 }}
+                {% else %}
+                    <span style="color: #999;">Нет описания</span>
+                {% endif %}
+
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; font-size: 11px; color: #888;">
+                    <a href="{% url 'timeline_edit' timeline.pk %}" style="color: #3b82f6; text-decoration: none;">
+                        <i class="fas fa-edit"></i> Редактировать
+                    </a>
+                    <button onclick="deleteNode({{ timeline.id }})"
+                            style="float: right; background: none; border: none; color: #ef4444; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// Глобальные переменные
+let scale = 1;
+let offsetX = 0;
+let offsetY = 0;
+let isDragging = false;
+let isPanning = false;
+let currentNode = null;
+let startX, startY, startLeft, startTop;
+
+// Инициализация
+document.addEventListener('DOMContentLoaded', function() {
+    initDragAndDrop();
+    initPanning();
+    updateBoardTransform();
+});
+
+// Инициализация перетаскивания узлов
+function initDragAndDrop() {
+    document.querySelectorAll('.timeline-node').forEach(node => {
+        node.addEventListener('mousedown', startDrag);
+    });
+}
+
+function startDrag(e) {
+    if (e.button !== 0) return; // Только левая кнопка
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    currentNode = e.currentTarget;
+    isDragging = true;
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    startLeft = parseFloat(currentNode.style.left);
+    startTop = parseFloat(currentNode.style.top);
+
+    currentNode.style.zIndex = '1000';
+    currentNode.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+function doDrag(e) {
+    if (!isDragging) return;
+
+    // Вычисляем сдвиг с учетом масштаба
+    const deltaX = (e.clientX - startX) / scale;
+    const deltaY = (e.clientY - startY) / scale;
+
+    // Привязка к сетке (опционально)
+    const snap = true;
+    const grid = {{ grid_size }};
+
+    let newX = startLeft + deltaX;
+    let newY = startTop + deltaY;
+
+    if (snap) {
+        newX = Math.round(newX / grid) * grid;
+        newY = Math.round(newY / grid) * grid;
+    }
+
+    currentNode.style.left = newX + 'px';
+    currentNode.style.top = newY + 'px';
+}
+
+function stopDrag() {
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    if (currentNode) {
+        currentNode.style.zIndex = '';
+        currentNode.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+
+        // Сохраняем позицию
+        const nodeId = currentNode.dataset.id;
+        const x = parseFloat(currentNode.style.left);
+        const y = parseFloat(currentNode.style.top);
+
+        saveNodePosition(nodeId, x, y);
+    }
+
+    document.removeEventListener('mousemove', doDrag);
+    document.removeEventListener('mouseup', stopDrag);
+}
+
+// Панорамирование доски
+function initPanning() {
+    const container = document.getElementById('board-container');
+
+    container.addEventListener('mousedown', function(e) {
+        if (e.button === 1 || (e.button === 0 && e.altKey)) { // Средняя кнопка или Alt+левая
+            isPanning = true;
+            startX = e.clientX - offsetX;
+            startY = e.clientY - offsetY;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
+    container.addEventListener('mousemove', function(e) {
+        if (!isPanning) return;
+
+        offsetX = e.clientX - startX;
+        offsetY = e.clientY - startY;
+        updateBoardTransform();
+    });
+
+    container.addEventListener('mouseup', function() {
+        isPanning = false;
+        container.style.cursor = '';
+    });
+
+    // Масштабирование колесиком
+    container.addEventListener('wheel', function(e) {
+        e.preventDefault();
+
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newScale = Math.max(0.1, Math.min(3, scale * delta));
+
+        // Масштабируем относительно курсора
+        const rect = container.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const scaleFactor = newScale / scale;
+
+        offsetX = mouseX - (mouseX - offsetX) * scaleFactor;
+        offsetY = mouseY - (mouseY - offsetY) * scaleFactor;
+        scale = newScale;
+
+        updateBoardTransform();
+    });
+}
+
+function updateBoardTransform() {
+    const board = document.getElementById('board');
+    board.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+}
+
+function resetView() {
+    scale = 1;
+    offsetX = 0;
+    offsetY = 0;
+    updateBoardTransform();
+}
+
+// Создание нового таймлайна
+function createTimeline() {
+    const title = prompt('Название нового таймлайна:', 'Мой таймлайн');
+    if (!title) return;
+
+    const container = document.getElementById('board-container');
+    const rect = container.getBoundingClientRect();
+
+    // Позиция в центре видимой области
+    const boardX = (-offsetX / scale) + (rect.width / 2 / scale) - 125;
+    const boardY = (-offsetY / scale) + (rect.height / 2 / scale) - 75;
+
+    // Отправляем AJAX запрос
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('board_x', boardX);
+    formData.append('board_y', boardY);
+    formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+    fetch('{% url "board_create_timeline" %}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Обновляем страницу чтобы увидеть новый таймлайн
+            location.reload();
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+}
+
+// Сохранение позиции
+function saveNodePosition(nodeId, x, y) {
+    fetch(`/board/node/${nodeId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ x: x, y: y })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Ошибка сохранения:', data.error);
+        }
+    });
+}
+
+// Удаление узла - исправленная функция
+function deleteNode(nodeId) {
+    if (!confirm('Удалить этот таймлайн?')) return;
+
+    fetch(`/board/node/${nodeId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Удаляем узел с анимацией
+            const node = document.getElementById(`node-${nodeId}`);
+            if (node) {
+                node.style.opacity = '0';
+                node.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    node.remove();
+                }, 300);
+            }
+        } else {
+            alert('Ошибка удаления: ' + data.error);
+        }
+    });
+}
+
+// Вспомогательные функции
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

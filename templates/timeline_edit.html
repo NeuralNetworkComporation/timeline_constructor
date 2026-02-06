@@ -5,10 +5,18 @@
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold gradient-text">Редактирование: {{ timeline.title }}</h2>
-                <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-outline-primary" target="_blank">
-                    <i class="fas fa-eye me-1"></i>Просмотр
-                </a>
+                <div>
+                    <h2 class="fw-bold gradient-text">Редактирование: {{ timeline.title }}</h2>
+                    <p class="text-muted">Управляйте настройками и событиями вашего таймлайна</p>
+                </div>
+                <div class="btn-group">
+                    <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-outline-primary" target="_blank">
+                        <i class="fas fa-eye me-1"></i>Просмотр
+                    </a>
+                    <a href="{% url 'timeline_settings' timeline.pk %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-cog me-1"></i>Настройки
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -16,18 +24,20 @@
     <div class="row g-4">
         <!-- Настройки таймлайна -->
         <div class="col-lg-6">
-            <div class="glass-card p-4">
-                <h4 class="fw-bold mb-3">Основные настройки</h4>
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-3">
+                    <i class="fas fa-cog text-primary me-2"></i>Основные настройки
+                </h4>
 
                 <form method="post">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Название таймлайна</label>
+                        <label class="form-label fw-semibold">Название таймлайна</label>
                         <input type="text" name="title" class="form-control" value="{{ timeline.title }}" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Описание</label>
+                        <label class="form-label fw-semibold">Описание</label>
                         <textarea name="description" class="form-control" rows="3">{{ timeline.description }}</textarea>
                     </div>
 
@@ -35,7 +45,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="is_public"
                                    {% if timeline.is_public %}checked{% endif %}>
-                            <label class="form-check-label">
+                            <label class="form-check-label fw-semibold">
                                 Публичный таймлайн
                             </label>
                         </div>
@@ -50,56 +60,87 @@
 
         <!-- Добавление события -->
         <div class="col-lg-6">
-            <div class="glass-card p-4">
-                <h4 class="fw-bold mb-3">Добавить событие</h4>
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-3">
+                    <i class="fas fa-plus-circle text-success me-2"></i>Добавить событие
+                </h4>
 
-                <form method="post" action="{% url 'event_create' timeline.pk %}">
+                <form method="post" action="{% url 'event_create' timeline.pk %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     <div class="mb-3">
-                        <label class="form-label">Название события</label>
+                        <label class="form-label fw-semibold">Название события *</label>
                         <input type="text" name="title" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Описание</label>
+                        <label class="form-label fw-semibold">Описание *</label>
                         <textarea name="description" class="form-control" rows="2" required></textarea>
                     </div>
 
                     <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <label class="form-label fw-semibold">Год *</label>
+                            <input type="number" name="year" class="form-control" required min="-3000" max="2100">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">Месяц</label>
+                            <input type="number" name="month" class="form-control" min="1" max="12" placeholder="1-12">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label">День</label>
+                            <input type="number" name="day" class="form-control" min="1" max="31" placeholder="1-31">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <label class="form-label">Год</label>
-                            <input type="number" name="year" class="form-control" required>
+                            <label class="form-label fw-semibold">Эпоха *</label>
+                            <select name="era" class="form-select" required>
+                                <option value="ancient">🏛️ Древняя математика</option>
+                                <option value="medieval">⛪ Средневековая математика</option>
+                                <option value="renaissance">🎨 Эпоха Возрождения</option>
+                                <option value="enlightenment">💡 Эпоха Просвещения</option>
+                                <option value="modern">🔬 Современная математика</option>
+                                <option value="contemporary">💻 Современность</option>
+                            </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label">Эпоха</label>
-                            <select name="era" class="form-select" required>
-                                <option value="ancient">Древняя математика</option>
-                                <option value="medieval">Средневековая математика</option>
-                                <option value="renaissance">Эпоха Возрождения</option>
-                                <option value="modern">Современная математика</option>
-                                <option value="contemporary">Современность</option>
+                            <label class="form-label fw-semibold">Тип события</label>
+                            <select name="event_type" class="form-select">
+                                <option value="discovery">🔍 Открытие</option>
+                                <option value="invention">⚡ Изобретение</option>
+                                <option value="publication">📚 Публикация</option>
+                                <option value="theory">🧠 Теория</option>
+                                <option value="method">🛠️ Метод</option>
+                                <option value="award">🏆 Награда</option>
+                                <option value="event">📅 Событие</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="row g-2 mb-3">
                         <div class="col-6">
-                            <label class="form-label">Тип события</label>
-                            <select name="event_type" class="form-select">
-                                <option value="discovery">Открытие</option>
-                                <option value="invention">Изобретение</option>
-                                <option value="publication">Публикация</option>
-                                <option value="event">Событие</option>
+                            <label class="form-label fw-semibold">Важность</label>
+                            <select name="importance" class="form-select">
+                                <option value="1">⭐ Низкая</option>
+                                <option value="2" selected>⭐⭐ Средняя</option>
+                                <option value="3">⭐⭐⭐ Высокая</option>
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label">Важность</label>
-                            <select name="importance" class="form-select">
-                                <option value="1">Низкая</option>
-                                <option value="2">Средняя</option>
-                                <option value="3">Высокая</option>
-                            </select>
+                            <label class="form-label">Местоположение</label>
+                            <input type="text" name="location" class="form-control" placeholder="Город, страна">
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Теги</label>
+                        <input type="text" name="tags" class="form-control" placeholder="математика, открытие, теория...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Изображение</label>
+                        <input type="file" name="image" class="form-control" accept="image/*">
                     </div>
 
                     <button type="submit" class="btn btn-success w-100">
@@ -113,7 +154,7 @@
         <div class="col-12">
             <div class="glass-card p-4">
                 <h4 class="fw-bold mb-3">
-                    События таймлайна
+                    <i class="fas fa-list text-primary me-2"></i>События таймлайна
                     <span class="badge bg-primary ms-2">{{ events.count }}</span>
                 </h4>
 
@@ -124,31 +165,51 @@
                         <div class="card h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <h6 class="card-title">{{ event.title }}</h6>
-                                    <form method="post" action="{% url 'event_delete' event.pk %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Удалить событие?')">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <h6 class="card-title fw-bold">{{ event.title }}</h6>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'event_edit' event.pk %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="{% url 'event_delete' event.pk %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-outline-danger"
+                                                    onclick="return confirm('Удалить событие?')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </div>
 
                                 <div class="d-flex align-items-center mb-2">
-                                    <span class="badge bg-primary me-2">{{ event.year }} г.</span>
+                                    <span class="badge bg-primary me-2">{{ event.full_date }}</span>
                                     <small class="text-muted">{{ event.get_era_display }}</small>
                                 </div>
 
-                                <p class="card-text small text-muted">{{ event.description|truncatewords:10 }}</p>
+                                <p class="card-text small text-muted mb-2">{{ event.description|truncatewords:15 }}</p>
 
-                                <div class="d-flex justify-content-between">
+                                {% if event.image %}
+                                <div class="text-center mb-2">
+                                    <img src="{{ event.image.url }}" alt="{{ event.title }}"
+                                         class="img-fluid rounded" style="max-height: 80px;">
+                                </div>
+                                {% endif %}
+
+                                <div class="d-flex justify-content-between align-items-center">
                                     <small class="text-muted">{{ event.get_event_type_display }}</small>
-                                    <small class="text-muted">
+                                    <small class="text-warning">
                                         {% if event.importance == 3 %}⭐️⭐️⭐️
                                         {% elif event.importance == 2 %}⭐️⭐️
                                         {% else %}⭐️{% endif %}
                                     </small>
                                 </div>
+
+                                {% if event.tags %}
+                                <div class="mt-2">
+                                    {% for tag in event.get_tags_list %}
+                                    <span class="badge bg-light text-dark small me-1">{{ tag }}</span>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -164,4 +225,58 @@
         </div>
     </div>
 </div>
+
+<!-- Добавьте этот скрипт в timeline_edit.html -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const colorSelect = document.querySelector('select[name="color_scheme"]');
+        const layoutSelect = document.querySelector('select[name="layout"]');
+        const previewElements = document.querySelectorAll('.preview-element');
+
+        function updatePreview() {
+            const color = colorSelect.value;
+            const layout = layoutSelect.value;
+
+            // Обновляем цвет в предпросмотре
+            previewElements.forEach(el => {
+                if (color === 'blue') {
+                    el.style.borderColor = '#3b82f6';
+                    el.style.color = '#3b82f6';
+                } else if (color === 'purple') {
+                    el.style.borderColor = '#8b5cf6';
+                    el.style.color = '#8b5cf6';
+                } else if (color === 'orange') {
+                    el.style.borderColor = '#f97316';
+                    el.style.color = '#f97316';
+                } else if (color === 'red') {
+                    el.style.borderColor = '#ef4444';
+                    el.style.color = '#ef4444';
+                } else if (color === 'teal') {
+                    el.style.borderColor = '#14b8a6';
+                    el.style.color = '#14b8a6';
+                } else {
+                    el.style.borderColor = '#10b981';
+                    el.style.color = '#10b981';
+                }
+            });
+
+            // Показываем подсказку о макете
+            let layoutText = 'Вертикальный (слева даты, справа контент)';
+            if (layout === 'horizontal') {
+                layoutText = 'Горизонтальный (прокручивается вбок)';
+            } else if (layout === 'centered') {
+                layoutText = 'Центрированный (события по бокам от центральной линии)';
+            }
+
+            // Можно добавить визуальный предпросмотр
+            console.log('Цвет:', color, 'Макет:', layout);
+        }
+
+        colorSelect.addEventListener('change', updatePreview);
+        layoutSelect.addEventListener('change', updatePreview);
+
+        // Инициализируем при загрузке
+        updatePreview();
+    });
+</script>
 {% endblock %}

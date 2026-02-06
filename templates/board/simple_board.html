@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid p-0" style="height: calc(100vh - 60px);">
+    <!-- Панель инструментов -->
+    <div class="bg-white shadow-sm p-2 border-bottom">
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary btn-sm" onclick="createNode()">
+                <i class="fas fa-plus"></i> Создать узел
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="resetView()">
+                <i class="fas fa-expand"></i> Сброс
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="toggleGrid()">
+                <i class="fas fa-th"></i> Сетка
+            </button>
+        </div>
+    </div>
+
+    <!-- Контейнер доски -->
+    <div id="board-container"
+         style="width: 100%; height: calc(100vh - 120px); overflow: auto; background: #f8f9fa;">
+
+        <div id="board" style="position: relative; width: 5000px; height: 5000px;">
+            <!-- Сетка -->
+            <div id="grid" style="position: absolute; width: 100%; height: 100%;
+                  background-image: linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+                  background-size: 50px 50px;"></div>
+
+            <!-- Узлы -->
+            {% for node in nodes %}
+            <div class="board-node"
+                 id="node-{{ node.id }}"
+                 style="position: absolute; left: {{ node.x }}px; top: {{ node.y }}px;
+                        width: 200px; min-height: 120px; background: {{ node.bg_color }};
+                        border: 2px solid {{ node.color }}; border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: move;
+                        user-select: none;">
+
+                <div style="background: {{ node.color }}; color: white; padding: 8px 12px;
+                     border-radius: 6px 6px 0 0; font-weight: bold; font-size: 14px;">
+                    {{ node.title }}
+                    <button onclick="deleteNode({{ node.id }})"
+                            style="float: right; background: transparent; border: none; color: white; cursor: pointer;">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div style="padding: 10px; font-size: 13px; color: #333;">
+                    {% if node.description %}
+                        {{ node.description|truncatechars:80 }}
+                    {% else %}
+                        <span style="color: #999;">Нет описания</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Глобальные переменные
+let isDragging = false;
+let currentNode = null;
+let startX, startY, startLeft, startTop;
+
+// Инициализация перетаскивания узлов
+document.addEventListener('DOMContentLoaded', function() {
+    initNodeDragging();
+    initBoardPan();
+});
+
+// Перетаскивание узлов
+function initNodeDragging() {
+    document.querySelectorAll('.board-node').forEach(node => {
+        node.addEventListener('mousedown', startDrag);
+    });
+}
+
+function startDrag(e) {
+    if (e.button !== 0) return; // Только левая кнопка мыши
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    currentNode = e.currentTarget;
+    isDragging = true;
+
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const style = window.getComputedStyle(currentNode);
+    startLeft = parseFloat(style.left);
+    startTop = parseFloat(style.top);
+
+    currentNode.style.opacity = '0.9';
+    currentNode.style.zIndex = '1000';
+
+    document.addEventListener('mousemove', doDrag);
+    document.addEventListener('mouseup', stopDrag);
+}
+
+function doDrag(e) {
+    if (!isDragging) return;
+
+    const deltaX = e.clientX - startX;
+    const deltaY = e.clientY - startY;
+
+    currentNode.style.left = (startLeft + deltaX) + 'px';
+    currentNode.style.top = (startTop + deltaY) + 'px';
+}
+
+function stopDrag() {
+    if (!isDragging) return;
+
+    isDragging = false;
+
+    if (currentNode) {
+        currentNode.style.opacity = '1';
+        currentNode.style.zIndex = '';
+
+        // Сохраняем позицию на сервере
+        const nodeId = currentNode.id.replace('node-', '');
+        const x = parseFloat(currentNode.style.left);
+        const y = parseFloat(currentNode.style.top);
+
+        saveNodePosition(nodeId, x, y);
+    }
+
+    document.removeEventListener('mousemove', doDrag);
+    document.removeEventListener('mouseup', stopDrag);
+}
+
+// Панорамирование доски
+function initBoardPan() {
+    const container = document.getElementById('board-container');
+    let isPanning = false;
+    let startPanX, startPanY, startScrollLeft, startScrollTop;
+
+    container.addEventListener('mousedown', function(e) {
+        if (e.button === 1 || (e.button === 0 && e.altKey)) { // Средняя кнопка или Alt+левая
+            isPanning = true;
+            startPanX = e.clientX;
+            startPanY = e.clientY;
+            startScrollLeft = container.scrollLeft;
+            startScrollTop = container.scrollTop;
+            container.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
+    container.addEventListener('mousemove', function(e) {
+        if (!isPanning) return;
+
+        const deltaX = e.clientX - startPanX;
+        const deltaY = e.clientY - startPanY;
+
+        container.scrollLeft = startScrollLeft - deltaX;
+        container.scrollTop = startScrollTop - deltaY;
+    });
+
+    container.addEventListener('mouseup', function() {
+        isPanning = false;
+        container.style.cursor = '';
+    });
+
+    container.addEventListener('mouseleave', function() {
+        isPanning = false;
+        container.style.cursor = '';
+    });
+}
+
+// Создание узла
+function createNode() {
+    const title = prompt('Введите название узла:', 'Новый узел');
+    if (!title) return;
+
+    const board = document.getElementById('board-container');
+    const x = board.scrollLeft + 100;
+    const y = board.scrollTop + 100;
+
+    fetch('/board/node/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            title: title,
+            x: x,
+            y: y
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Добавляем узел на доску
+            addNodeToBoard(data.node);
+        } else {
+            alert('Ошибка: ' + data.error);
+        }
+    });
+}
+
+function addNodeToBoard(node) {
+    const board = document.getElementById('board');
+
+    const nodeHtml = `
+        <div class="board-node"
+             id="node-${node.id}"
+             style="position: absolute; left: ${node.x}px; top: ${node.y}px;
+                    width: 200px; min-height: 120px; background: ${node.bg_color};
+                    border: 2px solid ${node.color}; border-radius: 8px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.1); cursor: move;
+                    user-select: none;">
+
+            <div style="background: ${node.color}; color: white; padding: 8px 12px;
+                 border-radius: 6px 6px 0 0; font-weight: bold; font-size: 14px;">
+                ${node.title}
+                <button onclick="deleteNode(${node.id})"
+                        style="float: right; background: transparent; border: none; color: white; cursor: pointer;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div style="padding: 10px; font-size: 13px; color: #333;">
+                Нет описания
+            </div>
+        </div>
+    `;
+
+    board.insertAdjacentHTML('beforeend', nodeHtml);
+    initNodeDragging(); // Инициализируем перетаскивание для нового узла
+}
+
+// Сохранение позиции
+function saveNodePosition(nodeId, x, y) {
+    fetch(`/board/node/${nodeId}/update/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ x: x, y: y })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            console.error('Ошибка сохранения:', data.error);
+        }
+    });
+}
+
+// Удаление узла
+function deleteNode(nodeId) {
+    if (!confirm('Удалить этот узел?')) return;
+
+    fetch(`/board/node/${nodeId}/delete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const node = document.getElementById(`node-${nodeId}`);
+            if (node) node.remove();
+        }
+    });
+}
+
+// Вспомогательные функции
+function resetView() {
+    const container = document.getElementById('board-container');
+    container.scrollLeft = 0;
+    container.scrollTop = 0;
+}
+
+function toggleGrid() {
+    const grid = document.getElementById('grid');
+    grid.style.display = grid.style.display === 'none' ? 'block' : 'none';
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Правый клик для создания узла
+document.getElementById('board-container').addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+    createNode();
+});
+</script>
+{% endblock %}

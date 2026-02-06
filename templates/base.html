@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MathTimeline - Конструктор таймлайнов{% endblock %}</title>
 
+    <!-- ФАВИКОН -->
+    <link rel="icon" href="/favicon.ico">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -13,6 +16,160 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
+        /* Стили для красивого FAQ */
+.faq-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.faq-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 2px solid transparent;
+}
+
+.faq-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: var(--primary-light);
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+}
+
+.faq-header {
+    padding: 1.5rem 1.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.faq-icon-circle {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.faq-title {
+    font-weight: 600;
+    margin-bottom: 0;
+    flex: 1;
+}
+
+.faq-body {
+    padding: 1rem 1.5rem 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.faq-actions {
+    margin-top: auto;
+}
+
+.faq-stats .stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.faq-stats .stat-label {
+    font-size: 0.8rem;
+    color: var(--secondary);
+    margin-top: 0.25rem;
+}
+
+.template-badge {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--primary-dark);
+    font-weight: 500;
+    padding: 0.4em 0.8em;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.template-badge:hover {
+    background: var(--primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.template-card {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.template-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.template-preview {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2.5rem;
+}
+
+.template-info {
+    background: white;
+}
+
+.support-options .btn {
+    transition: all 0.2s ease;
+}
+
+.support-options .btn:hover {
+    transform: translateY(-2px);
+}
+
+/* Анимация появления карточек */
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.faq-card {
+    animation: cardAppear 0.5s ease forwards;
+    animation-delay: calc(var(--card-index, 0) * 0.1s);
+    opacity: 0;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .faq-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .faq-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .faq-icon-circle {
+        margin: 0 auto;
+    }
+}
+
         :root {
             --primary: #10b981;
             --primary-dark: #059669;
@@ -253,81 +410,98 @@
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-project-diagram me-2"></i>MathTimeline
-            </a>
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'home' %}">
+            <i class="fas fa-project-diagram me-2"></i>MathTimeline
+        </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'home' %}">
+                        <i class="fas fa-home me-1"></i>Главная
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'timeline_list' %}">
+                        <i class="fas fa-list me-1"></i>Все таймлайны
+                    </a>
+                </li>
+                {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-1"></i>Мои проекты
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'board' %}">
+                        <i class="fas fa-border-all me-1"></i>Доска
+                        <span class="badge bg-warning ms-1" style="font-size: 0.6rem; padding: 2px 6px;">Demo</span>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>{{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu glass-card border-0 shadow-lg">
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">
+                                <i class="fas fa-tachometer-alt me-2"></i>Личный кабинет
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'board' %}">
+                                <i class="fas fa-border-all me-2"></i>Интерактивная доска
+                                <span class="badge bg-warning ms-1 float-end" style="font-size: 0.6rem; padding: 2px 6px;">Demo</span>
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Выйти
+                            </a></li>
+                        </ul>
+                    </li>
+                {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">
-                            <i class="fas fa-home me-1"></i>Главная
+                        <a class="nav-link" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Войти
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'timeline_list' %}">
-                            <i class="fas fa-list me-1"></i>Все таймлайны
+                        <a class="btn btn-primary ms-2" href="{% url 'signup' %}">
+                            <i class="fas fa-user-plus me-1"></i>Регистрация
                         </a>
                     </li>
-                    {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'dashboard' %}">
-                            <i class="fas fa-tachometer-alt me-1"></i>Мои проекты
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle me-1"></i>{{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu glass-card border-0 shadow-lg">
-                                <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Личный кабинет</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Выйти</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Войти
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-primary ms-2" href="{% url 'signup' %}">
-                                <i class="fas fa-user-plus me-1"></i>Регистрация
-                            </a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+                {% endif %}
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
     <!-- Messages -->
     {% if messages %}
         <div class="container mt-3 fade-in">
             {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show glass-card" role="alert">
-                    <div class="d-flex align-items-center">
-                        <i class="fas
-                            {% if message.tags == 'success' %}fa-check-circle text-success
-                            {% elif message.tags == 'error' %}fa-exclamation-circle text-danger
-                            {% elif message.tags == 'warning' %}fa-exclamation-triangle text-warning
-                            {% else %}fa-info-circle text-info{% endif %}
-                            me-2"></i>
-                        {{ message }}
-                    </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
+    <div class="d-flex align-items-center">
+        {% if message.tags == 'success' %}
+        <i class="fas fa-check-circle text-success me-2"></i>
+        {% elif message.tags == 'error' %}
+        <i class="fas fa-exclamation-circle text-danger me-2"></i>
+        {% elif message.tags == 'warning' %}
+        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+        {% else %}
+        <i class="fas fa-info-circle text-info me-2"></i>
+        {% endif %}
+        {{ message }}
+    </div>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
             {% endfor %}
         </div>
     {% endif %}

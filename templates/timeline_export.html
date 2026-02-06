@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 fade-in">
+            <div class="glass-card p-5 text-center">
+                <div class="mb-4">
+                    <i class="fas fa-file-export display-1 gradient-text mb-3"></i>
+                    <h2 class="fw-bold gradient-text">Экспорт таймлайна</h2>
+                    <p class="text-muted">{{ timeline.title }}</p>
+                </div>
+                
+                <div class="glass-card p-4 mb-4 text-start">
+                    <h5 class="fw-bold">{{ timeline.title }}</h5>
+                    <p class="text-muted mb-2">{{ timeline.description|truncatewords:20 }}</p>
+                    <div class="d-flex text-muted small">
+                        <span class="me-3"><i class="fas fa-calendar me-1"></i>Создан: {{ timeline.created_at|date:"d.m.Y" }}</span>
+                        <span><i class="fas fa-list me-1"></i>Событий: {{ timeline.events.count }}</span>
+                    </div>
+                </div>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <div class="glass-card p-3">
+                            <h6 class="fw-bold mb-2">Что экспортируется?</h6>
+                            <ul class="text-muted small mb-0">
+                                <li>Название и описание таймлайна</li>
+                                <li>Все события с датами и описаниями</li>
+                                <li>Настройки отображения</li>
+                                <li>Метаданные (автор, дата экспорта)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="glass-card p-3">
+                            <h6 class="fw-bold mb-2">Для чего это нужно?</h6>
+                            <ul class="text-muted small mb-0">
+                                <li>Резервное копирование</li>
+                                <li>Перенос на другой аккаунт</li>
+                                <li>Совместная работа вне платформы</li>
+                                <li>Импорт в другие системы</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info glass-card border-info mb-4">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Файл будет скачан в формате JSON. Вы можете открыть его в любом текстовом редакторе.
+                </div>
+                
+                <div class="d-flex gap-3 justify-content-center">
+                    <a href="{% url 'timeline_edit' timeline.pk %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>Отмена
+                    </a>
+                    <a href="{% url 'timeline_export_download' timeline.pk %}" class="btn btn-primary btn-lg" 
+                       onclick="showDownloadMessage()">
+                        <i class="fas fa-download me-2"></i>Скачать JSON
+                    </a>
+                </div>
+                
+                <div class="mt-4">
+                    <small class="text-muted">
+                        После скачивания вы можете 
+                        <a href="{% url 'timeline_import' %}">импортировать</a> 
+                        этот файл для создания копии.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function showDownloadMessage() {
+        // Показываем сообщение перед скачиванием
+        alert('Начинается скачивание файла. Если загрузка не началась, проверьте настройки браузера.');
+        
+        // Можно добавить отслеживание скачивания
+        setTimeout(function() {
+            window.location.href = "{% url 'timeline_edit' timeline.pk %}";
+        }, 3000);
+    }
+    
+    // Автоматическое скачивание через 5 секунд (опционально)
+    // setTimeout(function() {
+    //     document.querySelector('.btn-primary').click();
+    // }, 5000);
+</script>
+{% endblock %}

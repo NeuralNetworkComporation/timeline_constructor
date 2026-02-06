@@ -1,11 +1,20 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.views.generic.base import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
+from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('timeline_constructor_app.urls')),
+
+# Маршрут для favicon в корне
+    path('favicon.ico', serve, {
+        'document_root': settings.BASE_DIR,
+        'path': 'favicon.ico'
+    }),
 ]
 
 if settings.DEBUG:

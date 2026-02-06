@@ -1,0 +1,76 @@
+<form method="post" id="timelineCreateForm" class="modal-form">
+    {% csrf_token %}
+
+    <h4 class="fw-bold gradient-text mb-3">Создать новый таймлайн</h4>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Название *</label>
+        {{ form.title }}
+        {% if form.title.errors %}
+        <div class="text-danger small">{{ form.title.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label fw-semibold">Описание</label>
+        {{ form.description }}
+        {% if form.description.errors %}
+        <div class="text-danger small">{{ form.description.errors }}</div>
+        {% endif %}
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <label class="form-label">Цветовая схема</label>
+            {{ form.color_scheme }}
+        </div>
+        <div class="col-6">
+            <label class="form-label">Макет</label>
+            {{ form.layout }}
+        </div>
+    </div>
+
+    <div class="form-check mb-3">
+        {{ form.is_public }}
+        <label class="form-check-label">Публичный таймлайн</label>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary flex-grow-1" onclick="hideTimelineModal()">
+            Отмена
+        </button>
+        <button type="submit" class="btn btn-primary flex-grow-1">
+            Создать
+        </button>
+    </div>
+</form>
+
+<script>
+    document.getElementById('timelineCreateForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Таймлайн создан', 'success');
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 1000);
+            } else {
+                showToast('Ошибка создания', 'error');
+            }
+        })
+        .catch(error => {
+            showToast('Ошибка сети', 'error');
+        });
+    });
+</script>

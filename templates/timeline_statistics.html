@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row fade-in">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-5">
+                <div>
+                    <h1 class="display-5 fw-bold gradient-text mb-2">Статистика</h1>
+                    <p class="lead text-dark">Аналитика и статистика MathTimeline</p>
+                </div>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Назад в кабинет
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Общая статистика -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="stats-card glass-card p-4 text-center">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3 class="fw-bold text-white">{{ total_timelines }}</h3>
+                <p class="mb-0 text-white-50">Таймлайнов</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stats-card glass-card p-4 text-center" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-history"></i>
+                </div>
+                <h3 class="fw-bold text-white">{{ total_events }}</h3>
+                <p class="mb-0 text-white-50">Событий</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stats-card glass-card p-4 text-center" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h3 class="fw-bold text-white">{{ total_views }}</h3>
+                <p class="mb-0 text-white-50">Просмотров</p>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="stats-card glass-card p-4 text-center" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                <div class="stats-icon mb-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="fw-bold text-white">{{ user_count }}</h3>
+                <p class="mb-0 text-white-50">Пользователей</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Популярные таймлайны -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-4">
+                    <i class="fas fa-fire text-warning me-2"></i>Популярные таймлайны
+                </h4>
+                
+                <div class="list-group">
+                    {% for timeline in popular_timelines %}
+                    <div class="list-group-item border-0 p-3 mb-2 glass-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-1">{{ timeline.title }}</h6>
+                                <small class="text-muted">Автор: {{ timeline.created_by.username }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary rounded-pill">{{ timeline.views_count }} 👁️</span>
+                                <span class="badge bg-success ms-1 rounded-pill">{{ timeline.likes_count }} ❤️</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 d-flex justify-content-between">
+                            <small class="text-muted">{{ timeline.events_count }} событий</small>
+                            <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-sm btn-outline-primary">
+                                Смотреть
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-line fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">Пока нет статистики просмотров</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Распределение по эпохам -->
+        <div class="col-lg-6">
+            <div class="glass-card p-4 h-100">
+                <h4 class="fw-bold mb-4">
+                    <i class="fas fa-chart-pie text-primary me-2"></i>Распределение по эпохам
+                </h4>
+                
+                <div class="era-stats">
+                    {% for stat in era_stats %}
+                    <div class="era-item mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>
+                                {% if stat.era == 'ancient' %}🏛️ Древняя математика
+                                {% elif stat.era == 'medieval' %}⛪ Средневековая
+                                {% elif stat.era == 'renaissance' %}🎨 Возрождение
+                                {% elif stat.era == 'enlightenment' %}💡 Просвещение
+                                {% elif stat.era == 'modern' %}🔬 Современная
+                                {% elif stat.era == 'contemporary' %}💻 Современность
+                                {% else %}{{ stat.era }}
+                                {% endif %}
+                            </span>
+                            <span class="fw-bold">{{ stat.count }}</span>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ stat.count|divisibleby:total_events|default:0 }}%; 
+                                        background: {% cycle 'var(--primary)' '#3b82f6' '#8b5cf6' '#f97316' '#ef4444' '#14b8a6' %};">
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-calendar-alt fa-2x text-muted mb-3"></i>
+                        <p class="text-muted">Нет данных по эпохам</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Недавние таймлайны -->
+                <div class="mt-5">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-clock text-secondary me-2"></i>Недавно созданные
+                    </h5>
+                    
+                    <div class="recent-timelines">
+                        {% for timeline in recent_timelines %}
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="flex-grow-1">
+                                <small class="fw-semibold">{{ timeline.title|truncatechars:30 }}</small>
+                                <br>
+                                <small class="text-muted">{{ timeline.created_at|timesince }} назад</small>
+                            </div>
+                            <a href="{% url 'timeline_detail' timeline.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Дополнительная статистика -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h4 class="fw-bold mb-3">
+                    <i class="fas fa-chart-bar text-success me-2"></i>Дополнительная информация
+                </h4>
+                
+                <div class="row text-center">
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="h5 fw-bold text-primary">{{ public_percentage|default:"0" }}%</div>
+                            <small class="text-muted">Публичных таймлайнов</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="h5 fw-bold text-success">{{ avg_events|default:"0" }}</div>
+                            <small class="text-muted">Среднее событий на таймлайн</small>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <div class="h5 fw-bold text-warning">{{ active_users|default:"0" }}</div>
+                            <small class="text-muted">Активных пользователей</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stats-card {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5rem;
+    }
+    
+    .era-stats .progress {
+        background: #e5e7eb;
+        border-radius: 4px;
+    }
+    
+    .era-stats .progress-bar {
+        border-radius: 4px;
+        transition: width 1s ease;
+    }
+    
+    .list-group-item {
+        border: 1px solid rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .list-group-item:hover {
+        transform: translateX(5px);
+        border-color: var(--primary-light);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Анимация прогресс-баров
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const currentWidth = bar.style.width;
+            bar.style.width = '0';
+            
+            setTimeout(() => {
+                bar.style.width = currentWidth;
+            }, 300);
+        });
+        
+        // Анимация счетчиков
+        const counters = document.querySelectorAll('.stats-card h3');
+        counters.forEach(counter => {
+            const target = parseInt(counter.textContent);
+            const duration = 1500;
+            const increment = target / (duration / 16);
+            
+            let current = 0;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                counter.textContent = Math.floor(current);
+            }, 16);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,171 @@
+<nav class="board-navbar">
+    <button class="board-btn board-btn-primary" onclick="createNewTimeline()">
+        <i class="fas fa-plus"></i>
+        Создать таймлайн
+    </button>
+
+    <button class="board-btn" onclick="toggleGrid()" id="gridToggle">
+        <i class="fas fa-th"></i>
+        <span>Сетка</span>
+    </button>
+
+    <button class="board-btn" onclick="toggleAutoArrange()" id="autoArrangeToggle">
+        <i class="fas fa-project-diagram"></i>
+        <span>Авто-расположение</span>
+    </button>
+
+    <button class="board-btn" onclick="exportBoard()">
+        <i class="fas fa-download"></i>
+        <span>Экспорт</span>
+    </button>
+
+    <button class="board-btn" onclick="importBoard()">
+        <i class="fas fa-upload"></i>
+        <span>Импорт</span>
+    </button>
+
+    <div style="width: 1px; height: 30px; background: #e5e7eb; margin: 0 10px;"></div>
+
+    <button class="board-btn" onclick="window.location.href='{% url 'dashboard' %}'">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Мои проекты</span>
+    </button>
+
+    <button class="board-btn" onclick="window.location.href='{% url 'home' %}'">
+        <i class="fas fa-home"></i>
+        <span>Главная</span>
+    </button>
+</nav>
+
+<script>
+    function createNewTimeline() {
+        // Создаем таймлайн в центре экрана
+        const viewbox = window.boardDraw.viewbox();
+        const centerX = viewbox.x + viewbox.width / 2;
+        const centerY = viewbox.y + viewbox.height / 2;
+
+        createTimelineAt(centerX - NODE_WIDTH / 2, centerY - NODE_HEIGHT / 2);
+    }
+
+    function toggleGrid() {
+        const grid = document.querySelector('#grid');
+        const toggle = document.getElementById('gridToggle');
+
+        if (grid.style.display === 'none') {
+            grid.style.display = '';
+            toggle.innerHTML = '<i class="fas fa-th"></i><span>Сетка</span>';
+            showToast('Сетка включена', 'info');
+        } else {
+            grid.style.display = 'none';
+            toggle.innerHTML = '<i class="fas fa-th-large"></i><span>Сетка</span>';
+            showToast('Сетка выключена', 'info');
+        }
+    }
+
+    function toggleAutoArrange() {
+        const toggle = document.getElementById('autoArrangeToggle');
+
+        if (toggle.classList.contains('active')) {
+            toggle.classList.remove('active');
+            toggle.innerHTML = '<i class="fas fa-project-diagram"></i><span>Авто-расположение</span>';
+            showToast('Авто-расположение выключено', 'info');
+        } else {
+            toggle.classList.add('active');
+            toggle.innerHTML = '<i class="fas fa-check-circle"></i><span>Авто-расположение</span>';
+            arrangeNodes();
+            showToast('Узлы автоматически расположены', 'success');
+        }
+    }
+
+    function arrangeNodes() {
+        // Алгоритм автоматического расположения узлов
+        const nodes = Array.from(document.querySelectorAll('.timeline-node'));
+        const centerX = 0;
+        const centerY = 0;
+        const radius = Math.max(300, nodes.length * 50);
+
+        nodes.forEach((node, index) => {
+            const angle = (index * 2 * Math.PI) / nodes.length;
+            const x = centerX + radius * Math.cos(angle) - NODE_WIDTH / 2;
+            const y = centerY + radius * Math.sin(angle) - NODE_HEIGHT / 2;
+
+            node.setAttribute('data-x', x);
+            node.setAttribute('data-y', y);
+            node.style.transform = `translate(${x}px, ${y}px)`;
+
+            // Сохраняем позицию
+            const timelineId = node.id.replace('node-', '');
+            saveNodePosition(timelineId, x, y);
+
+            // Обновляем соединения
+            updateConnections(node.id);
+        });
+    }
+
+    function exportBoard() {
+        // Экспорт всей доски в JSON
+        const boardData = {
+            nodes: [],
+            connections: window.boardState.connections.map(conn => ({
+                source: conn.source,
+                target: conn.target
+            })),
+            metadata: {
+                exported_at: new Date().toISOString(),
+                version: '1.0'
+            }
+        };
+
+        document.querySelectorAll('.timeline-node').forEach(node => {
+            boardData.nodes.push({
+                id: node.id.replace('node-', ''),
+                x: parseFloat(node.getAttribute('data-x')) || 0,
+                y: parseFloat(node.getAttribute('data-y')) || 0,
+                title: node.querySelector('.node-title-text').textContent
+            });
+        });
+
+        const dataStr = JSON.stringify(boardData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+        const exportFileDefaultName = `math-timeline-board-${new Date().toISOString().slice(0,10)}.json`;
+
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+
+        showToast('Доска экспортирована', 'success');
+    }
+
+    function importBoard() {
+        // Создаем input для загрузки файла
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json';
+
+        input.onchange = function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                try {
+                    const boardData = JSON.parse(e.target.result);
+
+                    // Здесь будет логика импорта
+                    showToast('Импорт временно недоступен', 'warning');
+
+                    // В будущем: загрузка данных и обновление доски
+                    // loadBoardData(boardData);
+
+                } catch (error) {
+                    showToast('Ошибка чтения файла', 'error');
+                }
+            };
+
+            reader.readAsText(file);
+        };
+
+        input.click();
+    }
+</script>

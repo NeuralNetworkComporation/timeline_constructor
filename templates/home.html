@@ -216,8 +216,289 @@
     </div>
 </section>
 
-<!-- CTA Section -->
+<!-- FAQ Section -->
 <section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5 fade-in">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold gradient-text mb-3">Часто задаваемые вопросы</h2>
+                <p class="lead text-dark">Всё, что нужно знать о работе с MathTimeline</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="faq-grid">
+                    <!-- FAQ Item с действиями -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <h5 class="faq-title">Экспорт таймлайнов</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Сохраняйте ваши таймлайны в JSON формате для резервного копирования или переноса данных.</p>
+
+                            <div class="faq-actions mt-3">
+                                {% if user.is_authenticated and user.timeline_set.exists %}
+                                    <a href="{% url 'timeline_export' user.timeline_set.first.pk %}"
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-file-export me-1"></i>Экспортировать пример
+                                    </a>
+                                {% endif %}
+                                <a href="#export-instructions" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-info-circle me-1"></i>Инструкция
+                                </a>
+                            </div>
+
+                            <div class="faq-details mt-3" id="export-instructions">
+                                <div class="accordion">
+                                    <div class="accordion-item border-0">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed bg-light" type="button" data-bs-toggle="collapse" data-bs-target="#exportSteps">
+                                                Как экспортировать
+                                            </button>
+                                        </h2>
+                                        <div id="exportSteps" class="accordion-collapse collapse">
+                                            <div class="accordion-body small">
+                                                <ol class="mb-0">
+                                                    <li>Откройте таймлайн в редакторе</li>
+                                                    <li>Нажмите кнопку "Настройки"</li>
+                                                    <li>Выберите "Экспорт в JSON"</li>
+                                                    <li>Файл автоматически скачается</li>
+                                                </ol>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item с формой -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <h5 class="faq-title">Импорт данных</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Загружайте готовые таймлайны из JSON файлов или переносите данные из других систем.</p>
+
+                            <div class="faq-actions mt-3">
+            <!-- ИЗМЕНЕНИЕ ЗДЕСЬ: добавляем проверку авторизации -->
+            {% if user.is_authenticated %}
+                <a href="{% url 'timeline_import' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-upload me-1"></i>Импортировать сейчас
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}?next={% url 'timeline_import' %}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-sign-in-alt me-1"></i>Войти для импорта
+                </a>
+            {% endif %}
+        </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item со статистикой -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h5 class="faq-title">Статистика</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Следите за популярностью ваших таймлайнов и анализируйте активность.</p>
+
+                            <div class="faq-stats mt-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="stat-value">{{ timelines_count|default:"0" }}</div>
+                                        <div class="stat-label">Таймлайнов</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-value">{{ events_count|default:"0" }}</div>
+                                        <div class="stat-label">Событий</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-actions mt-3">
+                                <a href="{% url 'timeline_statistics' %}" class="btn btn-sm btn-outline-primary w-100">
+                                    <i class="fas fa-chart-bar me-1"></i>Вся статистика
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item с поиском -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <h5 class="faq-title">Поиск таймлайнов</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Найдите интересующие вас таймлайны по ключевым словам, эпохам или авторам.</p>
+
+                            <form method="get" action="{% url 'timeline_search' %}" class="mt-3">
+                                <div class="input-group">
+                                    <input type="text" name="q" class="form-control" placeholder="Поиск..." aria-label="Поиск">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted mt-1 d-block">Попробуйте: "математика", "открытие", "XX век"</small>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item с шаблонами -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-layer-group"></i>
+                            </div>
+                            <h5 class="faq-title">Готовые шаблоны</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Начните с готовых шаблонов для популярных тем по истории математики.</p>
+
+                            <div class="template-previews mt-3">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <span class="badge template-badge">Древняя математика</span>
+                                    <span class="badge template-badge">Эпоха Возрождения</span>
+                                    <span class="badge template-badge">Современность</span>
+                                    <span class="badge template-badge">Русские математики</span>
+                                </div>
+                            </div>
+
+                            <div class="faq-actions mt-3">
+                                <button class="btn btn-sm btn-outline-success w-100" data-bs-toggle="modal" data-bs-target="#templatesModal">
+                                    <i class="fas fa-magic me-1"></i>Выбрать шаблон
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FAQ Item с поддержкой -->
+                    <div class="faq-card glass-card">
+                        <div class="faq-header">
+                            <div class="faq-icon-circle">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <h5 class="faq-title">Поддержка</h5>
+                        </div>
+                        <div class="faq-body">
+                            <p class="text-muted">Нужна помощь? Мы всегда готовы ответить на ваши вопросы.</p>
+
+                            <div class="support-options mt-3">
+                                <div class="d-grid gap-2">
+                                    <a href="mailto:support@mathtimeline.ru" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-envelope me-1"></i>Написать на почту
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#supportInfo">
+                                        <i class="fas fa-info-circle me-1"></i>Контактная информация
+                                    </button>
+                                </div>
+
+                                <div class="collapse mt-2" id="supportInfo">
+                                    <div class="card card-body bg-light border-0 small">
+                                        <p class="mb-1"><strong>Время работы:</strong> Пн-Пт, 9:00-18:00</p>
+                                        <p class="mb-1"><strong>Ответ в течение:</strong> 24 часов</p>
+                                        <p class="mb-0"><strong>Приоритет:</strong> Образовательные учреждения</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal для шаблонов -->
+<div class="modal fade" id="templatesModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-card border-0">
+            <div class="modal-header border-0">
+                <h5 class="modal-title gradient-text fw-bold">Выберите шаблон</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-landmark"></i>
+                            </div>
+                            <div class="template-info p-3">
+                                <h6 class="fw-bold">Древняя математика</h6>
+                                <p class="small text-muted mb-2">Египет, Вавилон, Древняя Греция</p>
+                                <button class="btn btn-sm btn-primary w-100" onclick="createFromTemplate('ancient')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
+                                <i class="fas fa-castle"></i>
+                            </div>
+                            <div class="template-info p-3">
+                                <h6 class="fw-bold">Средневековье</h6>
+                                <p class="small text-muted mb-2">Арабские математики, Европа</p>
+                                <button class="btn btn-sm btn-primary w-100" onclick="createFromTemplate('medieval')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="template-info p-3">
+                                <h6 class="fw-bold">Эпоха Возрождения</h6>
+                                <p class="small text-muted mb-2">Декарт, Ньютон, Лейбниц</p>
+                                <button class="btn btn-sm btn-primary w-100" onclick="createFromTemplate('renaissance')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="template-card">
+                            <div class="template-preview" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                                <i class="fas fa-microchip"></i>
+                            </div>
+                            <div class="template-info p-3">
+                                <h6 class="fw-bold">Современность</h6>
+                                <p class="small text-muted mb-2">XX-XXI век, компьютерная эра</p>
+                                <button class="btn btn-sm btn-primary w-100" onclick="createFromTemplate('modern')">
+                                    Использовать
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<section class="py-5">
     <div class="container">
         <div class="glass-card p-5 text-center fade-in">
             <h2 class="display-6 fw-bold gradient-text mb-3">Готовы начать?</h2>
@@ -240,4 +521,270 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Стили для FAQ аккордеона */
+    .faq-accordion {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .faq-item {
+        border: var(--border);
+        transition: all 0.3s ease;
+    }
+
+    .faq-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .faq-question {
+        cursor: pointer;
+        background: var(--card-bg);
+        transition: all 0.3s ease;
+        border-bottom: 2px solid transparent;
+    }
+
+    .faq-question:hover {
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .faq-question[aria-expanded="true"] {
+        border-bottom-color: var(--primary);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .faq-question[aria-expanded="true"] .faq-icon i {
+        transform: rotate(45deg);
+        color: var(--primary);
+    }
+
+    .faq-icon {
+        transition: all 0.3s ease;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--primary);
+    }
+
+    .faq-icon i {
+        transition: transform 0.3s ease;
+    }
+
+    .faq-answer {
+        background: var(--light);
+        border-top: var(--border);
+        animation: fadeIn 0.3s ease;
+    }
+
+    .faq-answer ul {
+        padding-left: 1.5rem;
+    }
+
+    .faq-answer li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Плавная анимация раскрытия */
+    .collapse {
+        transition: all 0.3s ease;
+    }
+
+    .collapsing {
+        transition: height 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .faq-question h5 {
+            font-size: 1rem;
+            margin-right: 15px;
+        }
+
+        .faq-question {
+            padding: 1rem !important;
+        }
+
+        .faq-answer {
+            padding: 1rem !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Интерактивный FAQ аккордеон
+    document.addEventListener('DOMContentLoaded', function() {
+        const faqItems = document.querySelectorAll('.faq-item');
+
+        faqItems.forEach(item => {
+            const question = item.querySelector('.faq-question');
+            const icon = item.querySelector('.faq-icon i');
+
+            // При загрузке страницы добавляем обработчики
+            question.addEventListener('click', function() {
+                // Находим целевой элемент collapse
+                const targetId = this.getAttribute('data-bs-target');
+                const target = document.querySelector(targetId);
+
+                // Добавляем плавную анимацию
+                if (target.classList.contains('show')) {
+                    // Закрываем
+                    target.style.maxHeight = target.scrollHeight + 'px';
+                    setTimeout(() => {
+                        target.style.maxHeight = '0px';
+                    }, 10);
+
+                    // Меняем иконку
+                    setTimeout(() => {
+                        icon.style.transform = 'rotate(0deg)';
+                    }, 150);
+                } else {
+                    // Открываем
+                    target.style.maxHeight = target.scrollHeight + 'px';
+
+                    // Меняем иконку
+                    setTimeout(() => {
+                        icon.style.transform = 'rotate(45deg)';
+                    }, 150);
+
+                    // Автоматически скрываем через 10 секунд, если нужно
+                    setTimeout(() => {
+                        if (target.classList.contains('show')) {
+                            const event = new Event('click');
+                            question.dispatchEvent(event);
+                        }
+                    }, 10000);
+                }
+            });
+
+            // Добавляем обработчик для Bootstrap collapse события
+            const targetId = question.getAttribute('data-bs-target');
+            const target = document.querySelector(targetId);
+
+            target.addEventListener('shown.bs.collapse', function() {
+                // Плавная прокрутка к открытому элементу
+                if (window.innerWidth < 768) {
+                    item.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+        });
+
+        // Открыть первый FAQ при загрузке (опционально)
+        // document.querySelector('.faq-question').click();
+
+        // Добавляем поддержку клавиатуры
+        faqItems.forEach(item => {
+            item.querySelector('.faq-question').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.click();
+                }
+            });
+        });
+    });
+
+    // Анимация карточек FAQ
+    document.addEventListener('DOMContentLoaded', function() {
+        const faqCards = document.querySelectorAll('.faq-card');
+
+        // Устанавливаем задержку для каждой карточки
+        faqCards.forEach((card, index) => {
+            card.style.setProperty('--card-index', index);
+        });
+
+        // Создание таймлайна из шаблона
+        window.createFromTemplate = function(templateType) {
+            const templates = {
+                'ancient': {
+                    title: 'Древняя математика',
+                    description: 'От египетских дробей до греческой геометрии',
+                    era: 'ancient'
+                },
+                'medieval': {
+                    title: 'Средневековая математика',
+                    description: 'Арабские цифры и развитие алгебры',
+                    era: 'medieval'
+                },
+                'renaissance': {
+                    title: 'Математика Возрождения',
+                    description: 'Декарт, Ньютон и научная революция',
+                    era: 'renaissance'
+                },
+                'modern': {
+                    title: 'Современная математика',
+                    description: 'XX-XXI век: от теории множеств до ИИ',
+                    era: 'contemporary'
+                }
+            };
+
+            const template = templates[templateType];
+
+            {% if user.is_authenticated %}
+                // Если пользователь авторизован
+                alert(`Создаем таймлайн "${template.title}"...`);
+                // Здесь можно добавить AJAX запрос
+                window.location.href = "{% url 'timeline_create' %}";
+            {% else %}
+                // Если нет, предлагаем зарегистрироваться
+                if (confirm(`Для создания таймлайна "${template.title}" нужно войти в аккаунт. Перейти к регистрации?`)) {
+                    window.location.href = "{% url 'signup' %}";
+                }
+            {% endif %}
+        };
+
+        // Подтверждение перед экспортом
+        const exportBtn = document.querySelector('a[href*="timeline_export"]');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', function(e) {
+                if (!confirm('Начнется скачивание JSON файла. Продолжить?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // Анимация для badge в шаблонах
+        document.querySelectorAll('.template-badge').forEach(badge => {
+            badge.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05) translateY(-2px)';
+            });
+
+            badge.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1) translateY(0)';
+            });
+        });
+
+        // Плавное раскрытие деталей поддержки
+        const supportToggle = document.querySelector('[data-bs-target="#supportInfo"]');
+        if (supportToggle) {
+            supportToggle.addEventListener('click', function() {
+                const icon = this.querySelector('i');
+                if (this.getAttribute('aria-expanded') === 'true') {
+                    icon.className = 'fas fa-info-circle me-1';
+                } else {
+                    icon.className = 'fas fa-times-circle me-1';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}
