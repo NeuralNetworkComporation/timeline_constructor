@@ -1,5 +1,17 @@
 import os
 from pathlib import Path
+from decouple import config
+
+
+RAILWAY_APP_NAME = config('RAILWAY_APP_NAME', default='')
+RAILWAY_STATIC_URL = config('RAILWAY_STATIC_URL', default='')
+
+# CSRF настройки
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://math-timeline-constructor.up.railway.app',  # ваш домен
+]
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,6 +21,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com',
                  'math-timeline-constructor.up.railway.app',
+                 '.railway.app',
 ]
 
 INSTALLED_APPS = [
