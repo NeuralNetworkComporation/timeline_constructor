@@ -630,19 +630,22 @@ def login_required_with_redirect(view_func):
 
 @login_required
 def board_view(request):
-    """Исправленная версия доски"""
+    """Полнофункциональная доска с панелью инструментов"""
     # Получаем таймлайны пользователя
     timelines = Timeline.objects.filter(created_by=request.user)
 
-    # Создаем начальные позиции для таймлайнов без координат
-    for i, timeline in enumerate(timelines):
-        if timeline.board_x == 0 and timeline.board_y == 0:
-            timeline.board_x = 100 + (i % 5) * 300  # Располагаем в сетке
-            timeline.board_y = 100 + (i // 5) * 200
-            timeline.save()
+    print(f"DEBUG: Found {timelines.count()} timelines for user {request.user.username}")
+    for timeline in timelines:
+        print(f"  - {timeline.title}: x={timeline.board_x}, y={timeline.board_y}")
 
-    return render(request, 'board/board_fixed.html', {
+    # Получаем связи между таймлайнами
+    connections = BoardConnection.objects.filter(
+        source__created_by=request.user
+    ).select_related('source', 'target')
+
+    return render(request, 'board/board_new.html', {
         'timelines': timelines,
+        'connections': connections,
         'grid_size': 50
     })
 
@@ -692,18 +695,26 @@ def timeline_create_modal(request):
     return render(request, 'board/timeline_create_modal.html', {'form': form})
 
 
+@csrf_exempt
 @login_required
 def toggle_timeline_lock(request, pk):
     """Переключение блокировки таймлайна на доске"""
     if request.method == 'POST':
         timeline = get_object_or_404(Timeline, pk=pk, created_by=request.user)
-        timeline.board_locked = not timeline.board_locked
+
+        # Добавьте поле board_locked в модель или используйте is_public
+        # Если нет поля board_locked, добавьте его:
+        # timeline.board_locked = not timeline.board_locked
+
+        # Временное решение - используем is_public для демонстрации
+        # Или создайте новое поле:
+        timeline.is_public = not timeline.is_public  # Временное решение
         timeline.save()
 
         return JsonResponse({
             'success': True,
-            'locked': timeline.board_locked,
-            'message': 'Таймлайн заблокирован' if timeline.board_locked else 'Таймлайн разблокирован'
+            'locked': not timeline.is_public,
+            'message': 'Таймлайн заблокирован' if not timeline.is_public else 'Таймлайн разблокирован'
         })
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})
@@ -993,5 +1004,45 @@ def board_create_timeline(request):
                 'board_x': timeline.board_x,
                 'board_y': timeline.board_y
             })
+
+    return JsonResponse({'success': False, 'error': 'Invalid request'})
+
+
+@csrf_exempt
+@login_required
+def arrange_board_nodes(request):
+    """Автоматическое расположение узлов на доске"""
+    if request.method == 'POST':
+        try:
+            timelines = Timeline.objects.filter(created_by=request.user)
+            positions = []
+
+            # Располагаем по спирали
+            center_x, center_y = 500, 500
+            radius = 200
+            angle_step = 2 * math.pi / max(1, len(timelines))
+
+            for i, timeline in enumerate(timelines):
+                angle = i * angle_step
+                x = center_x + radius * math.cos(angle) - 110
+                y = center_y + radius * math.sin(angle) - 70
+
+                timeline.board_x = x
+                timeline.board_y = y
+                timeline.save()
+
+                positions.append({
+                    'id': timeline.id,
+                    'x': x,
+                    'y': y
+                })
+
+            return JsonResponse({
+                'success': True,
+                'positions': positions,
+                'message': f'Упорядочено {len(timelines)} таймлайнов'
+            })
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)})
 
     return JsonResponse({'success': False, 'error': 'Invalid request'})

@@ -2,6 +2,28 @@
 
 {% block content %}
 <style>
+    .connection-point.connecting-mode {
+    animation: pulse 1.5s infinite;
+    cursor: pointer;
+}
+
+.connection-point.selected {
+    background: #10b981 !important;
+    transform: translate(-50%, -50%) scale(1.3) !important;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+    z-index: 21;
+}
+
+.temp-connection {
+    pointer-events: none;
+}
+
+@keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.2); }
+    100% { transform: translate(-50%, -50%) scale(1); }
+}
+
     /* Стили для доски */
     :root {
         --board-bg: #f8fafc;
@@ -338,9 +360,9 @@
             <div class="board-node {% if node.is_locked %}locked{% endif %}"
                  id="node-{{ node.id }}"
                  data-id="{{ node.id }}"
-                 style="left: {{ node.x }}px; top: {{ node.y }}px;
-                        border-color: {{ node.border_color }};
-                        background: {{ node.bg_color }};">
+                 style="left: {{ timeline.board_x }}px; top: {{ timeline.board_y }}px;
+                    border-color: {{ timeline.color_scheme|default:'#10b981' }};
+                    background: white;">
 
                 <!-- Заголовок -->
                 <div class="node-header" style="background: {{ node.color }};">
@@ -464,7 +486,14 @@
                     </div>
                     <div class="col-4">
                         <label class="form-label">Цвет рамки</label>
-                        <input type="color" id="node-border-color" class="form-control" value="#10b981">
+                        <select id="node-color-scheme" class="form-select">
+                            <option value="green">Зеленый</option>
+                            <option value="blue">Синий</option>
+                            <option value="purple">Фиолетовый</option>
+                            <option value="orange">Оранжевый</option>
+                            <option value="red">Красный</option>
+                            <option value="teal">Бирюзовый</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -833,50 +862,153 @@ function addNodeToBoard(node) {
 function toggleConnectMode() {
     const btn = document.getElementById('connectBtn');
 
-    if (boardState.isConnecting) {
-        boardState.isConnecting = false;
-        boardState.connectingFrom = null;
+    if (connectionState.isConnecting) {
+        // Выключаем режим
+        connectionState.isConnecting = false;
         btn.classList.remove('active');
+
+        // Отменяем текущее соединение, если есть
+        cancelConnection();
+
+        // Убираем анимацию с точек
+        document.querySelectorAll('.connection-point').forEach(p => {
+            p.classList.remove('connecting-mode');
+        });
+
         showToast('Режим соединения выключен', 'info');
     } else {
-        boardState.isConnecting = true;
+        // Включаем режим
+        connectionState.isConnecting = true;
         btn.classList.add('active');
-        showToast('Выберите первый узел для соединения', 'info');
+
+        // Добавляем анимацию на точки
+        document.querySelectorAll('.connection-point').forEach(p => {
+            p.classList.add('connecting-mode');
+        });
+
+        showToast('Включен режим соединения. Выберите первый узел', 'info');
     }
 }
 
 function initConnectionPoints() {
     document.querySelectorAll('.connection-point').forEach(point => {
-        point.addEventListener('click', function(e) {
-            e.stopPropagation();
-
-            if (!boardState.isConnecting) return;
-
-            const nodeId = this.dataset.node;
-            const side = this.dataset.side;
-
-            if (!boardState.connectingFrom) {
-                // Первый узел для соединения
-                boardState.connectingFrom = nodeId;
-                boardState.connectingSide = side;
-                this.style.background = '#10b981';
-                showToast('Теперь выберите второй узел', 'info');
-            } else if (boardState.connectingFrom !== nodeId) {
-                // Второй узел - создаем соединение
-                createConnection(boardState.connectingFrom, nodeId);
-
-                // Сбрасываем состояние
-                document.querySelectorAll('.connection-point').forEach(p => {
-                    p.style.background = 'white';
-                });
-                boardState.connectingFrom = null;
-                boardState.connectingSide = null;
-            }
-        });
+        point.addEventListener('click', handleConnectionPointClick);
     });
 }
 
+function handleConnectionPointClick(e) {
+    e.stopPropagation();
+
+    const point = e.currentTarget;
+    const nodeId = point.dataset.node;
+
+    if (!connectionState.isConnecting) {
+        showToast('Сначала включите режим соединения', 'warning');
+        return;
+    }
+
+    if (!connectionState.firstNode) {
+        // Первый клик - выбираем первый узел
+        selectFirstNode(nodeId, point);
+    } else if (connectionState.firstNode === nodeId) {
+        // Клик на тот же узел - отмена
+        cancelConnection();
+    } else {
+        // Второй клик - создаем соединение
+        createConnectionComplete(nodeId);
+    }
+}
+
+function createTempConnectionLine(point) {
+    const svg = document.getElementById('connections-layer');
+    const rect = point.getBoundingClientRect();
+    const svgRect = svg.getBoundingClientRect();
+
+    const x = (rect.left - svgRect.left + rect.width / 2);
+    const y = (rect.top - svgRect.top + rect.height / 2);
+
+    connectionState.connectionLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    connectionState.connectionLine.setAttribute('x1', x);
+    connectionState.connectionLine.setAttribute('y1', y);
+    connectionState.connectionLine.setAttribute('x2', x);
+    connectionState.connectionLine.setAttribute('y2', y);
+    connectionState.connectionLine.setAttribute('stroke', '#10b981');
+    connectionState.connectionLine.setAttribute('stroke-width', '2');
+    connectionState.connectionLine.setAttribute('stroke-dasharray', '5,5');
+    connectionState.connectionLine.classList.add('temp-connection');
+
+    svg.appendChild(connectionState.connectionLine);
+
+    // Обновляем линию при движении мыши
+    document.addEventListener('mousemove', updateTempConnectionLine);
+}
+
+function updateTempConnectionLine(e) {
+    if (!connectionState.connectionLine) return;
+
+    const svg = document.getElementById('connections-layer');
+    const svgRect = svg.getBoundingClientRect();
+
+    const x = e.clientX - svgRect.left;
+    const y = e.clientY - svgRect.top;
+
+    connectionState.connectionLine.setAttribute('x2', x);
+    connectionState.connectionLine.setAttribute('y2', y);
+}
+
+function createConnectionComplete(secondNodeId) {
+    // Удаляем временную линию
+    document.removeEventListener('mousemove', updateTempConnectionLine);
+    if (connectionState.connectionLine) {
+        connectionState.connectionLine.remove();
+    }
+
+    // Создаем реальное соединение
+    createConnection(connectionState.firstNode, secondNodeId);
+
+    // Сбрасываем состояние
+    cancelConnection();
+}
+
+function cancelConnection() {
+    if (connectionState.firstPoint) {
+        connectionState.firstPoint.classList.remove('selected');
+        connectionState.firstPoint.style.background = 'white';
+    }
+
+    document.removeEventListener('mousemove', updateTempConnectionLine);
+
+    if (connectionState.connectionLine) {
+        connectionState.connectionLine.remove();
+    }
+
+    connectionState.firstNode = null;
+    connectionState.firstPoint = null;
+    connectionState.connectionLine = null;
+
+    showToast('Соединение отменено', 'warning');
+}
+
+function selectFirstNode(nodeId, point) {
+    connectionState.firstNode = nodeId;
+    connectionState.firstPoint = point;
+
+    // Визуально выделяем точку
+    point.classList.add('selected');
+    point.style.background = '#10b981';
+
+    // Создаем временную линию
+    createTempConnectionLine(point);
+
+    showToast('Первый узел выбран. Выберите второй узел', 'info');
+}
+
 function createConnection(fromId, toId) {
+    if (fromId === toId) {
+        showToast('Нельзя соединить узел с самим собой', 'error');
+        return;
+    }
+
     fetch('/board/connection/create/', {
         method: 'POST',
         headers: {
@@ -897,8 +1029,27 @@ function createConnection(fromId, toId) {
         } else {
             showToast('Ошибка: ' + data.error, 'error');
         }
+    })
+    .catch(error => {
+        showToast('Ошибка сети при создании соединения', 'error');
     });
 }
+
+function resetConnectionPoints() {
+    // Сбрасываем все точки соединения
+    document.querySelectorAll('.connection-point').forEach(p => {
+        p.style.background = 'white';
+        p.style.transform = 'translate(-50%, -50%) scale(1)';
+    });
+
+    boardState.connectingFrom = null;
+    boardState.connectingSide = null;
+    boardState.isConnecting = false;
+
+    // Обновляем кнопку
+    document.getElementById('connectBtn').classList.remove('active');
+}
+
 
 function addConnectionToBoard(connection) {
     const svg = document.getElementById('connections-layer');
@@ -1043,58 +1194,37 @@ function toggleLock(nodeId) {
     const node = document.getElementById(`node-${nodeId}`);
     const isLocked = node.classList.contains('locked');
 
-    fetch(`/board/node/${nodeId}/update/`, {
-        method: 'PATCH',
+    fetch(`/board/node/${nodeId}/toggle-lock/`, {
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
-        },
-        body: JSON.stringify({ is_locked: !isLocked })
+        }
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            if (isLocked) {
-                node.classList.remove('locked');
-                showToast('Узел разблокирован', 'success');
-            } else {
+            if (data.locked) {
                 node.classList.add('locked');
-                showToast('Узел заблокирован', 'success');
+                node.querySelector('.node-btn i').className = 'fas fa-lock';
+                node.querySelector('.node-btn').title = 'Разблокировать';
+                showToast('Таймлайн заблокирован', 'success');
+            } else {
+                node.classList.remove('locked');
+                node.querySelector('.node-btn i').className = 'fas fa-unlock';
+                node.querySelector('.node-btn').title = 'Заблокировать';
+                showToast('Таймлайн разблокирован', 'success');
             }
-            initNodeDragging(); // Переинициализируем перетаскивание
         }
+    })
+    .catch(error => {
+        showToast('Ошибка при изменении блокировки', 'error');
     });
 }
 
 function editNode(nodeId) {
-    // Загружаем данные узла и открываем форму редактирования
-    fetch(`/board/node/${nodeId}/update/`, {
-        method: 'GET',
-        headers: {
-            'X-CSRFToken': getCookie('csrftoken')
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            document.getElementById('node-title').value = data.node.title;
-            document.getElementById('node-description').value = data.node.description;
-            document.getElementById('node-color').value = data.node.color;
-            document.getElementById('node-bg-color').value = data.node.bg_color;
-            document.getElementById('node-border-color').value = data.node.border_color;
-
-            // Сохраняем ID для обновления
-            document.getElementById('node-form').dataset.editId = nodeId;
-
-            // Позиция остается прежней
-            document.getElementById('node-x').value = data.node.x;
-            document.getElementById('node-y').value = data.node.y;
-
-            document.getElementById('node-modal').style.display = 'flex';
-            document.querySelector('.modal-title').textContent = 'Редактировать узел';
-            document.querySelector('button[type="submit"]').textContent = 'Сохранить';
-        }
-    });
+    // Открываем страницу редактирования таймлайна
+    window.open(`/timeline/${nodeId}/edit/`, '_blank');
 }
 
 function arrangeNodes() {
@@ -1193,6 +1323,13 @@ function showToast(message, type = 'info') {
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
+
+let connectionState = {
+    isConnecting: false,
+    firstNode: null,
+    firstPoint: null,
+    connectionLine: null
+};
 
 // Добавляем стили для анимаций
 const style = document.createElement('style');

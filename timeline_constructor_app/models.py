@@ -21,6 +21,8 @@ class Timeline(models.Model):
         ('centered', 'Центрированный'),
     ]
 
+    border_color = models.CharField(max_length=20, default='#10b981', verbose_name='Цвет рамки')
+
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)

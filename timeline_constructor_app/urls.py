@@ -42,9 +42,11 @@ urlpatterns = [
     path('board/node/create/', views.create_board_node, name='create_board_node'),
     path('board/node/<int:node_id>/update/', views.update_board_node, name='update_board_node'),
     path('board/node/<int:node_id>/delete/', views.delete_board_node, name='delete_board_node'),
+    path('board/arrange/', views.arrange_board_nodes, name='board_arrange'),
 
     path('board/', views.board_view, name='board'),
     path('board/timeline/create/', views.board_create_timeline, name='board_create_timeline'),
     path('board/node/<int:node_id>/update/', views.update_board_node, name='update_board_node'),
     path('board/node/<int:node_id>/delete/', views.delete_board_node, name='delete_board_node'),
+    path('board/timeline/<int:pk>/toggle-lock/', views.toggle_timeline_lock, name='toggle_timeline_lock'),
 ]
