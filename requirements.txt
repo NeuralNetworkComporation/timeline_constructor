@@ -4,7 +4,9 @@ python-decouple==3.8
 django-crispy-forms==2.0
 crispy-bootstrap5==0.7
 django-filter==23.3
+gunicorn==21.2.0
 pandas
 openpyxl
 xlsxwriter
 reportlab
+whitenoise==6.6.0
