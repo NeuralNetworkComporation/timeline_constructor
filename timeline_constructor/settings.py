@@ -7,7 +7,9 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production-12345'
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com',
+                 'math-timeline-constructor.up.railway.app',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
